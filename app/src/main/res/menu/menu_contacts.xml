@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/action_continue"
+        android:title="@string/action_continue"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_check_24dp"
+        app:showAsAction="always"/>
+
+</menu>

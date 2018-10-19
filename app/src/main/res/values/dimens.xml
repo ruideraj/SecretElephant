@@ -1,0 +1,17 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+
+    <dimen name="contacts_chip_height">32dp</dimen>
+
+    <!-- Initial height for RecyclerView containing contact chips. Needs to be high enough to
+         contain one row of contact chips. -->
+    <dimen name="contacts_input_recycler">48dp</dimen>
+
+    <!-- Max height for contact chips RecyclerView for containing 3 rows of chips.
+         3 chips vertically: 92dp, 8dp of space between each row: 16dp, 112dp total-->
+    <dimen name="contacts_input_recycler_max">112dp</dimen>
+
+</resources>

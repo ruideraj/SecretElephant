@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_activity">#FAFAFA</color>
+    <color name="bg_contact_selected">#E0E0E0</color>
+
+    <!-- Theme colors -->
+    <color name="theme_primary">#e53935</color>
+    <color name="theme_primary_dark">#ab000d</color>
+
+    // Must be named "colorAccent" to work with hard-coded attribute in MaterialChipsInput library's
+    // DetailedChipView.getBackgroundColor()
+    <color name="theme_accent">#80e27e</color>
+
+</resources>
