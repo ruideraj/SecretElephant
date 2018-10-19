@@ -1,2 +1,5 @@
-# android
-General repo for a single Android app project.
+# Secret Elephant
+
+Simple Android app to send invites for White Elephant or Secret Santa gift exchanges.
+
+Made as an exercise for implementing the MVVM architecture. 
