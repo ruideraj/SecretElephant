@@ -6,30 +6,25 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.TextView;
 
 import com.ruideraj.secretelephant.R;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Adapter for populating the list in ContactsListFragment
  */
-public class ContactAdapter extends RecyclerView.Adapter implements Filterable {
+public class ContactAdapter extends RecyclerView.Adapter {
 
-    private List<Contact> mFilteredContacts;
+    private List<Contact> mContacts;
     private ContactsViewModel mViewModel;
-    private ContactFilter mFilter;
     private ContactClickListener mClickListener;
 
     public ContactAdapter(@NonNull ContactsViewModel viewModel,
                           ContactClickListener clickListener) {
         mViewModel = viewModel;
         mClickListener = clickListener;
-        mFilter = new ContactFilter();
     }
 
     @Override
@@ -46,7 +41,7 @@ public class ContactAdapter extends RecyclerView.Adapter implements Filterable {
         ViewHolder vh = (ViewHolder) holder;
 
         // Fill in contact info
-        Contact contact = mFilteredContacts.get(position);
+        Contact contact = mContacts.get(position);
 
         vh.name.setText(contact.getName());
         vh.data.setText(contact.getData());
@@ -64,16 +59,11 @@ public class ContactAdapter extends RecyclerView.Adapter implements Filterable {
 
     @Override
     public int getItemCount() {
-        return mFilteredContacts == null ? 0 : mFilteredContacts.size();
-    }
-
-    @Override
-    public Filter getFilter() {
-        return mFilter;
+        return mContacts == null ? 0 : mContacts.size();
     }
 
     public void setData(List<Contact> data) {
-        mFilteredContacts = data;
+        mContacts = data;
         notifyDataSetChanged();
     }
 
@@ -101,37 +91,6 @@ public class ContactAdapter extends RecyclerView.Adapter implements Filterable {
                 mClickListener.onContactClick(position);
             }
 
-        }
-    }
-
-    private class ContactFilter extends Filter {
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            FilterResults results = new FilterResults();
-            List<Contact> filteredContacts;
-
-            if(constraint == null || constraint.toString().isEmpty()) {
-                filteredContacts = mFilteredContacts;
-            }
-            else {
-                filteredContacts = new ArrayList<>();
-                for(Contact contact : mFilteredContacts) {
-                    if(contact.getName().toLowerCase().contains(constraint)) {
-                        filteredContacts.add(contact);
-                    }
-                }
-            }
-
-            results.values = filteredContacts;
-            results.count = filteredContacts.size();
-
-            return results;
-        }
-
-        @Override
-        protected void publishResults(CharSequence constraint, FilterResults results) {
-            mFilteredContacts = (List<Contact>) results.values;
-            notifyDataSetChanged();
         }
     }
 }

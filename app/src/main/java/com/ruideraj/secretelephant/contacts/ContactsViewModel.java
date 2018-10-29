@@ -25,7 +25,6 @@ public class ContactsViewModel extends ViewModel {
     public String searchText = null;
 
     public final MutableLiveData<String> emailAccount = new MutableLiveData<>();
-    //public final MutableLiveData<String> searchText = new MutableLiveData<>();
     public final MediatorLiveData<Boolean> showLists = new MediatorLiveData<>();
     public final MutableLiveData<Boolean> showContinue = new MutableLiveData<>();
     public final MutableLiveData<GoogleSignInAccount> googleAccount = new MutableLiveData<>();
@@ -53,7 +52,7 @@ public class ContactsViewModel extends ViewModel {
 
         // TODO Check if this null check is necessary, how is it updated if account is revoked?
         if(account != null) {
-            googleAccount.postValue(account);
+            googleAccount.setValue(account);
         }
     }
 
@@ -66,11 +65,11 @@ public class ContactsViewModel extends ViewModel {
     }
 
     public void setGoogleAccount(GoogleSignInAccount account) {
-        googleAccount.postValue(account);
+        googleAccount.setValue(account);
     }
 
     public void setEmailAccount(String email) {
-        emailAccount.postValue(email);
+        emailAccount.setValue(email);
     }
 
     public Intent getSignInIntent() {
@@ -116,13 +115,13 @@ public class ContactsViewModel extends ViewModel {
             }
 
             if(selectedContacts.size() == 1) {
-                showContinue.postValue(true);
+                showContinue.setValue(true);
             }
             else if(selectedContacts.size() == 0) {
-                showContinue.postValue(false);
+                showContinue.setValue(false);
             }
 
-            updatedContact.postValue(contact);
+            updatedContact.setValue(contact);
 
             if(!TextUtils.isEmpty(searchText)) {
                 search(null);

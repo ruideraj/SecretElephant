@@ -26,13 +26,13 @@ public class MainViewModel extends ViewModel implements AccountManager.AccountLi
 
     @Override
     public void onSignOutSuccess() {
-        signedIn.postValue(false);
-        signOutMessage.postValue(R.string.main_menu_signed_out);
+        signedIn.setValue(false);
+        signOutMessage.setValue(R.string.main_menu_signed_out);
     }
 
     @Override
     public void onSignOutFailure() {
-        signOutMessage.postValue(R.string.main_menu_sign_out_failed);
+        signOutMessage.setValue(R.string.main_menu_sign_out_failed);
     }
 
     public void signOut() {
