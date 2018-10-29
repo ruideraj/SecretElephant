@@ -1,7 +1,6 @@
 package com.ruideraj.secretelephant.contacts;
 
 import android.Manifest;
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -21,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.flexbox.AlignItems;
@@ -49,6 +49,9 @@ public class ContactsActivity extends AppCompatActivity implements TextWatcher {
 
     private RecyclerView mRecycler;
     private ContactsInputAdapter mAdapter;
+    private LinearLayout mProgress;
+    private ViewPager mViewPager;
+
     private ContactsViewModel mContactsViewModel;
 
     @Override
@@ -59,9 +62,9 @@ public class ContactsActivity extends AppCompatActivity implements TextWatcher {
         mContactsViewModel = ViewModelProviders.of(this,
                 ViewModelFactory.getInstance(getApplication())).get(ContactsViewModel.class);
 
-        ViewPager viewPager = findViewById(R.id.contacts_viewpager);
+        mViewPager = findViewById(R.id.contacts_viewpager);
         ContactsPagerAdapter adapter = new ContactsPagerAdapter(getSupportFragmentManager());
-        viewPager.setAdapter(adapter);
+        mViewPager.setAdapter(adapter);
 
         mRecycler = findViewById(R.id.contacts_selected_recycler);
         FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(this);
@@ -76,12 +79,21 @@ public class ContactsActivity extends AppCompatActivity implements TextWatcher {
                 this);
         mRecycler.setAdapter(mAdapter);
 
-        mContactsViewModel.contacts.observe(this, contactsResult -> {
-            findViewById(R.id.contacts_progress_bar).setVisibility(View.GONE);
-            mRecycler.setVisibility(View.VISIBLE);
+        mProgress = findViewById(R.id.contacts_progress_bar);
 
-            ViewPager vp = findViewById(R.id.contacts_viewpager);
-            vp.setVisibility(View.VISIBLE);
+        mContactsViewModel.showLists.observe(this, show -> {
+            if(show != null) {
+                if(show) {
+                    mProgress.setVisibility(View.GONE);
+                    mRecycler.setVisibility(View.VISIBLE);
+                    this.mViewPager.setVisibility(View.VISIBLE);
+                }
+                else {
+                    mProgress.setVisibility(View.VISIBLE);
+                    mRecycler.setVisibility(View.GONE);
+                    this.mViewPager.setVisibility(View.GONE);
+                }
+            }
         });
 
         mContactsViewModel.googleAccount.observe(this, googleSignInAccount -> {
@@ -96,7 +108,7 @@ public class ContactsActivity extends AppCompatActivity implements TextWatcher {
         mContactsViewModel.updatedContact.observe(this, updatedContact -> {
             if(updatedContact == null) return;
 
-            if(updatedContact.isSelected()) {
+            if(mContactsViewModel.selectedData.contains(updatedContact.getData())) {
                 // Update last two items, the newly added item and the EditText
                 mAdapter.notifyItemRangeChanged(mAdapter.getItemCount() - 2, 2);
             }
@@ -115,7 +127,8 @@ public class ContactsActivity extends AppCompatActivity implements TextWatcher {
         super.onStart();
 
         mContactsViewModel.start();
-        if(mContactsViewModel.contacts.getValue() == null) {
+        if(mContactsViewModel.phones.getValue() == null &&
+                mContactsViewModel.emails.getValue() == null) {
             requestContacts();
         }
     }

@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
+import com.ruideraj.secretelephant.contacts.ContactsDao;
 import com.ruideraj.secretelephant.contacts.ContactsRepository;
 import com.ruideraj.secretelephant.contacts.ContactsSource;
 import com.ruideraj.secretelephant.contacts.ContactsViewModel;
@@ -45,7 +46,8 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
         }
         else if(modelClass.isAssignableFrom(ContactsViewModel.class)) {
             AccountManager accountManager = AccountManager.getInstance(mApplication);
-            ContactsSource contactsSource = ContactsRepository.getInstance(mApplication);
+            ContactsDao contactsDao = ContactsDao.getInstance(mApplication);
+            ContactsSource contactsSource = ContactsRepository.getInstance(contactsDao);
 
             //noinspection unchecked
             return (T) new ContactsViewModel(contactsSource, accountManager);

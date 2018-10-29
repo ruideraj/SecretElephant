@@ -1,5 +1,6 @@
 package com.ruideraj.secretelephant.contacts;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -50,21 +51,22 @@ public class ContactListFragment extends Fragment implements
         mRecycler = root.findViewById(R.id.contacts_list_recycler);
         LinearLayoutManager manager = new LinearLayoutManager(getContext());
         mRecycler.setLayoutManager(manager);
+        mAdapter = new ContactAdapter(mViewModel, this);
+        mRecycler.setAdapter(mAdapter);
 
         mType = args.getInt(ARG_CONTACT_TYPE);
 
-        mViewModel.contacts.observe(getActivity(), contactsResult -> {
-            if(contactsResult != null) {
-                List<Contact> contacts;
-                if(mType == Contact.TYPE_PHONE) {
-                    contacts = contactsResult.phones;
-                }
-                else {
-                    contacts = contactsResult.emails;
-                }
+        LiveData<List<Contact>> liveData;
+        if(mType == Contact.TYPE_PHONE) {
+            liveData = mViewModel.phones;
+        }
+        else {
+            liveData = mViewModel.emails;
+        }
 
-                mAdapter = new ContactAdapter(contacts, ContactListFragment.this);
-                mRecycler.setAdapter(mAdapter);
+        liveData.observe(getActivity(), list -> {
+            if(list != null) {
+                mAdapter.setData(list);
             }
         });
 
@@ -76,8 +78,6 @@ public class ContactListFragment extends Fragment implements
             mViewModel.emailAccount.observe(getActivity(),
                     email -> setOverlayVisible(TextUtils.isEmpty(email)));
         }
-
-        mViewModel.searchText.observe(getActivity(), this::filter);
 
         return root;
     }
@@ -92,13 +92,9 @@ public class ContactListFragment extends Fragment implements
     }
 
     @Override
-    public void onContactClick(int position, Contact contact) {
-        mViewModel.onContactClicked(contact);
+    public void onContactClick(int position) {
+        mViewModel.onContactClicked(mType, position);
         mAdapter.notifyItemChanged(position);
-    }
-
-    public void filter(CharSequence constraint) {
-        mAdapter.getFilter().filter(constraint);
     }
 
     public void setOverlayVisible(boolean visible) {

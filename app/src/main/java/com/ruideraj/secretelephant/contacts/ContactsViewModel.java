@@ -1,5 +1,6 @@
 package com.ruideraj.secretelephant.contacts;
 
+import android.arch.lifecycle.MediatorLiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.content.Intent;
@@ -10,14 +11,22 @@ import com.ruideraj.secretelephant.AccountManager;
 import com.ruideraj.secretelephant.SingleLiveEvent;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-public class ContactsViewModel extends ViewModel implements ContactsSource.ContactsCallback {
+public class ContactsViewModel extends ViewModel {
 
-    public final MutableLiveData<ContactsResult> contacts = new MutableLiveData<>();
+    public MutableLiveData<List<Contact>> phones;
+    public MutableLiveData<List<Contact>> emails;
+
     public final List<Contact> selectedContacts = new ArrayList<>();
+    public final Set<String> selectedData = new HashSet<>();
+    public String searchText = null;
+
     public final MutableLiveData<String> emailAccount = new MutableLiveData<>();
-    public final MutableLiveData<String> searchText = new MutableLiveData<>();
+    //public final MutableLiveData<String> searchText = new MutableLiveData<>();
+    public final MediatorLiveData<Boolean> showLists = new MediatorLiveData<>();
     public final MutableLiveData<Boolean> showContinue = new MutableLiveData<>();
     public final MutableLiveData<GoogleSignInAccount> googleAccount = new MutableLiveData<>();
 
@@ -30,24 +39,30 @@ public class ContactsViewModel extends ViewModel implements ContactsSource.Conta
     public ContactsViewModel(ContactsSource contactsSource, AccountManager accountManager) {
         mContactsSource = contactsSource;
         mAccountManager = accountManager;
+        phones = mContactsSource.getPhonesData();
+        emails = mContactsSource.getEmailsData();
+        showLists.addSource(phones, phoneList -> setListVisibility());
+        showLists.addSource(emails, emailList -> setListVisibility());
+
         showContinue.setValue(false);
         emailAccount.setValue("");
     }
 
-    @Override
-    public void onContactsLoaded(ContactsResult contactsResult) {
-        contacts.postValue(contactsResult);
-    }
-
     public void start() {
         GoogleSignInAccount account = mAccountManager.getAccount();
+
+        // TODO Check if this null check is necessary, how is it updated if account is revoked?
         if(account != null) {
             googleAccount.postValue(account);
         }
     }
 
     public void loadContacts() {
-        mContactsSource.loadContacts(this);
+        mContactsSource.loadContacts();
+    }
+
+    public void setListVisibility() {
+        showLists.setValue(phones.getValue() != null || emails.getValue() != null);
     }
 
     public void setGoogleAccount(GoogleSignInAccount account) {
@@ -63,39 +78,41 @@ public class ContactsViewModel extends ViewModel implements ContactsSource.Conta
     }
 
     public void search(String text) {
-        if(searchText.getValue() != null && !searchText.getValue().equals(text) ||
-                searchText.getValue() == null && !TextUtils.isEmpty(text)) {
+        if(searchText != null && !searchText.equals(text) ||
+                searchText == null && !TextUtils.isEmpty(text)) {
             if(!TextUtils.isEmpty(text)) text = text.toLowerCase();
-            searchText.postValue(text);
+            searchText = text;
+            mContactsSource.filter(text);
         }
     }
 
-    public void onContactClicked(Contact contact) {
-        ContactsResult contactsResult = contacts.getValue();
-        if(contactsResult == null) return;
+    public void onContactClicked(int type, int position) {
 
         List<Contact> list = null;
-        if(contact.getType() == Contact.TYPE_PHONE) {
-            list = contactsResult.phones;
+        if(type == Contact.TYPE_PHONE) {
+            list = phones.getValue();
         }
-        else if(contact.getType() == Contact.TYPE_EMAIL) {
-            list = contactsResult.emails;
+        else if(type == Contact.TYPE_EMAIL) {
+            list = emails.getValue();
         }
 
         if(list != null) {
-            boolean selected = !contact.isSelected();
-            contact.setSelected(selected);
+            Contact contact = list.get(position);
 
-            if(selected) {
-                selectedContacts.add(contact);
-            }
-            else {
+            String data = contact.getData();
+            if(selectedData.contains(data)) {
+                selectedData.remove(data);
+
                 for(Contact c : selectedContacts) {
-                    if(c.getData().equals(contact.getData())) {
+                    if(c.getData().equals(data)) {
                         selectedContacts.remove(c);
                         break;
                     }
                 }
+            }
+            else {
+                selectedData.add(data);
+                selectedContacts.add(contact);
             }
 
             if(selectedContacts.size() == 1) {
@@ -107,8 +124,8 @@ public class ContactsViewModel extends ViewModel implements ContactsSource.Conta
 
             updatedContact.postValue(contact);
 
-            if(!TextUtils.isEmpty(searchText.getValue())) {
-                searchText.postValue(null);
+            if(!TextUtils.isEmpty(searchText)) {
+                search(null);
             }
         }
     }

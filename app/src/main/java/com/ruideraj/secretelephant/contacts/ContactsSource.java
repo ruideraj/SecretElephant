@@ -1,12 +1,18 @@
 package com.ruideraj.secretelephant.contacts;
 
+import android.arch.lifecycle.MutableLiveData;
+
+import java.util.List;
+
 public interface ContactsSource {
 
-    interface ContactsCallback {
-        void onContactsLoaded(ContactsResult contactsResult);
-    }
+    MutableLiveData<List<Contact>> getPhonesData();
 
-    void loadContacts(ContactsCallback callback);
+    MutableLiveData<List<Contact>> getEmailsData();
+
+    void loadContacts();
+
+    void filter(String constraint);
 
     void clear();
 }
