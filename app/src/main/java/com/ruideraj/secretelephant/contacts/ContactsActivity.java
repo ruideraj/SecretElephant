@@ -3,7 +3,6 @@ package com.ruideraj.secretelephant.contacts;
 import android.Manifest;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -19,7 +18,6 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -29,9 +27,6 @@ import com.google.android.flexbox.FlexboxItemDecoration;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.tasks.Task;
 import com.ruideraj.secretelephant.Constants;
 import com.ruideraj.secretelephant.R;
@@ -44,7 +39,6 @@ import java.util.List;
 public class ContactsActivity extends AppCompatActivity implements TextWatcher {
 
     private static final int REQUEST_CONTACTS = 100;
-    private static final int REQUEST_GET_ACCOUNTS = 101;
     private static final int REQUEST_SIGN_IN = 1000;
 
     private RecyclerView mRecycler;
@@ -81,34 +75,23 @@ public class ContactsActivity extends AppCompatActivity implements TextWatcher {
 
         mProgress = findViewById(R.id.contacts_progress_bar);
 
-        mContactsViewModel.showLists.observe(this, show -> {
+        mContactsViewModel.showSelection.observe(this, show -> {
             if(show != null) {
-                if(show) {
-                    mProgress.setVisibility(View.GONE);
-                    mRecycler.setVisibility(View.VISIBLE);
-                    this.mViewPager.setVisibility(View.VISIBLE);
-                }
-                else {
-                    mProgress.setVisibility(View.VISIBLE);
-                    mRecycler.setVisibility(View.GONE);
-                    this.mViewPager.setVisibility(View.GONE);
-                }
+                mRecycler.setVisibility(show);
+                mViewPager.setVisibility(show);
             }
         });
 
-        mContactsViewModel.googleAccount.observe(this, googleSignInAccount -> {
-            if(googleSignInAccount != null) {
-                mContactsViewModel.setEmailAccount(googleSignInAccount.getEmail());
-            }
-            else {
-                mContactsViewModel.setEmailAccount(null);
+        mContactsViewModel.showProgress.observe(this, show -> {
+            if(show != null) {
+                mProgress.setVisibility(show);
             }
         });
 
-        mContactsViewModel.updatedContact.observe(this, updatedContact -> {
-            if(updatedContact == null) return;
+        mContactsViewModel.updatedContact.observe(this, added -> {
+            if(added == null) return;
 
-            if(mContactsViewModel.selectedData.contains(updatedContact.getData())) {
+            if(added) {
                 // Update last two items, the newly added item and the EditText
                 mAdapter.notifyItemRangeChanged(mAdapter.getItemCount() - 2, 2);
             }
@@ -117,20 +100,28 @@ public class ContactsActivity extends AppCompatActivity implements TextWatcher {
             }
         });
 
+        mContactsViewModel.requestPermission.observe(this, aVoid -> {
+            String[] permissions = {Manifest.permission.READ_CONTACTS};
+            ActivityCompat.requestPermissions(this, permissions, REQUEST_CONTACTS);
+        });
+
         mContactsViewModel.showContinue.observe(this, showContinue -> invalidateOptionsMenu());
 
         mContactsViewModel.selectAccount.observe(this, aVoid -> requestEmailAccount());
+
+        mContactsViewModel.toast.observe(this, stringId -> {
+            if(stringId != null) Toast.makeText(this, stringId, Toast.LENGTH_SHORT).show();
+        });
+
+        mContactsViewModel.finish.observe(this, aVoid -> finish());
     }
 
     @Override
     protected void onStart() {
         super.onStart();
 
-        mContactsViewModel.start();
-        if(mContactsViewModel.phones.getValue() == null &&
-                mContactsViewModel.emails.getValue() == null) {
-            requestContacts();
-        }
+        mContactsViewModel.start(ContextCompat
+                .checkSelfPermission(this, Manifest.permission.READ_CONTACTS));
     }
 
     @Override
@@ -139,29 +130,19 @@ public class ContactsActivity extends AppCompatActivity implements TextWatcher {
         switch(requestCode) {
             case REQUEST_SIGN_IN:
                 Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-                try {
-                    mContactsViewModel.setGoogleAccount(task.getResult(ApiException.class));
-                }
-                catch (ApiException e) {
-                    switch(e.getStatusCode()) {
-                        case GoogleSignInStatusCodes.SIGN_IN_FAILED:
-                        case CommonStatusCodes.NETWORK_ERROR:
-                            Toast.makeText(this, R.string.contact_google_sign_in_error,
-                                    Toast.LENGTH_SHORT).show();
-                            break;
-                    }
-                }
-
+                mContactsViewModel.signInResult(task);
                 break;
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if(mContactsViewModel.selectedContacts.size() > 0) {
+        Boolean show = mContactsViewModel.showContinue.getValue();
+        if(show != null && show) {
             MenuInflater inflater = this.getMenuInflater();
             inflater.inflate(R.menu.menu_contacts, menu);
         }
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -187,23 +168,7 @@ public class ContactsActivity extends AppCompatActivity implements TextWatcher {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch(requestCode) {
             case REQUEST_CONTACTS:
-                if(grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    // Show error Toast and go back to previous screen if contacts permission is denied.
-                    Toast.makeText(this, R.string.contact_permission_contacts_denied, Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-                else {
-                    mContactsViewModel.loadContacts();
-                }
-                break;
-            case REQUEST_GET_ACCOUNTS:
-                if(grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    // Show error Toast if accounts permission is denied.
-                    Toast.makeText(this, R.string.contact_permission_accounts_denied, Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    requestEmailAccount();
-                }
+                mContactsViewModel.onRequestPermissionsResult(grantResults);
                 break;
         }
     }
@@ -219,17 +184,6 @@ public class ContactsActivity extends AppCompatActivity implements TextWatcher {
 
     @Override
     public void afterTextChanged(Editable editable) {
-    }
-
-    private void requestContacts() {
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) !=
-                PackageManager.PERMISSION_GRANTED) {
-            String[] permissions = {Manifest.permission.READ_CONTACTS};
-            ActivityCompat.requestPermissions(this, permissions, REQUEST_CONTACTS);
-        }
-        else {
-            mContactsViewModel.loadContacts();
-        }
     }
 
     private void requestEmailAccount() {
