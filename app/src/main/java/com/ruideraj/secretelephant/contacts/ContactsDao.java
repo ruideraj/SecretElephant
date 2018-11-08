@@ -23,7 +23,7 @@ public class ContactsDao {
     private static String[] EMAILS_PROJECTION = {
             ContactsContract.CommonDataKinds.Email.DATA };
 
-    private static ContactsDao INSTANCE;
+    private static volatile ContactsDao INSTANCE;
     private static final Object sLock = new Object();
 
     private Application mApplication;

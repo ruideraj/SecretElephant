@@ -26,14 +26,11 @@ import java.util.Set;
 
 public class ContactsViewModel extends ViewModel {
 
-    public MutableLiveData<List<Contact>> phones;
-    public MutableLiveData<List<Contact>> emails;
-
-    public int contactsPermission = PackageManager.PERMISSION_DENIED;
+    public final MutableLiveData<List<Contact>> phones;
+    public final MutableLiveData<List<Contact>> emails;
 
     public final List<Contact> selectedContacts = new ArrayList<>();
     public final Set<String> selectedData = new HashSet<>();
-    public String searchText = null;
 
     public final MutableLiveData<String> emailAccount = new MutableLiveData<>();
 
@@ -47,14 +44,17 @@ public class ContactsViewModel extends ViewModel {
     public final SingleLiveEvent<Integer> toast = new SingleLiveEvent<>();
     public final SingleLiveEvent<Void> finish = new SingleLiveEvent<>();
 
-    private ContactsSource mContactsSource;
+    private ContactsRepository mContactsRepository;
     private AccountManager mAccountManager;
 
-    public ContactsViewModel(ContactsSource contactsSource, AccountManager accountManager) {
-        mContactsSource = contactsSource;
+    private String searchText = null;
+    private int contactsPermission = PackageManager.PERMISSION_DENIED;
+
+    public ContactsViewModel(ContactsRepository contactsRepository, AccountManager accountManager) {
+        mContactsRepository = contactsRepository;
         mAccountManager = accountManager;
-        phones = mContactsSource.getPhonesData();
-        emails = mContactsSource.getEmailsData();
+        phones = mContactsRepository.getPhonesData();
+        emails = mContactsRepository.getEmailsData();
         showSelection.addSource(phones, phoneList -> setListVisibility());
         showSelection.addSource(emails, emailList -> setListVisibility());
 
@@ -99,7 +99,7 @@ public class ContactsViewModel extends ViewModel {
     }
 
     public void loadContacts() {
-        mContactsSource.loadContacts();
+        mContactsRepository.loadContacts();
     }
 
     private void setListVisibility() {
@@ -149,8 +149,12 @@ public class ContactsViewModel extends ViewModel {
                 searchText == null && !TextUtils.isEmpty(text)) {
             if(!TextUtils.isEmpty(text)) text = text.toLowerCase();
             searchText = text;
-            mContactsSource.filter(text);
+            mContactsRepository.filter(text);
         }
+    }
+
+    public String getSearchText() {
+        return searchText;
     }
 
     public void onContactClicked(int type, int position) {

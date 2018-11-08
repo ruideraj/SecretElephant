@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 
 import com.ruideraj.secretelephant.contacts.ContactsDao;
 import com.ruideraj.secretelephant.contacts.ContactsRepository;
-import com.ruideraj.secretelephant.contacts.ContactsSource;
 import com.ruideraj.secretelephant.contacts.ContactsViewModel;
 import com.ruideraj.secretelephant.main.MainViewModel;
 
@@ -47,10 +46,10 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
         else if(modelClass.isAssignableFrom(ContactsViewModel.class)) {
             AccountManager accountManager = AccountManager.getInstance(mApplication);
             ContactsDao contactsDao = ContactsDao.getInstance(mApplication);
-            ContactsSource contactsSource = ContactsRepository.getInstance(contactsDao);
+            ContactsRepository contactsRepository = ContactsRepository.getInstance(contactsDao);
 
             //noinspection unchecked
-            return (T) new ContactsViewModel(contactsSource, accountManager);
+            return (T) new ContactsViewModel(contactsRepository, accountManager);
         }
 
         throw new IllegalArgumentException("Unknown ViewModel class: " + modelClass.getName());

@@ -3,14 +3,12 @@ package com.ruideraj.secretelephant.contacts;
 import android.arch.lifecycle.MutableLiveData;
 import android.os.AsyncTask;
 
-import com.ruideraj.secretelephant.ADB;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContactsRepository implements ContactsSource, ContactsDao.DaoCallback {
+public class ContactsRepository implements ContactsDao.DaoCallback {
 
-    private static ContactsRepository INSTANCE;
+    private static volatile ContactsRepository INSTANCE;
     private static final Object sLock = new Object();
 
     private ContactsDao mContactsDao;
@@ -18,8 +16,8 @@ public class ContactsRepository implements ContactsSource, ContactsDao.DaoCallba
     private FilterTask mPhonesFilterTask;
     private FilterTask mEmailsFilterTask;
 
-    private MutableLiveData<List<Contact>> mPhones = new MutableLiveData<>();
-    private MutableLiveData<List<Contact>> mEmails = new MutableLiveData<>();
+    private final MutableLiveData<List<Contact>> mPhones = new MutableLiveData<>();
+    private final MutableLiveData<List<Contact>> mEmails = new MutableLiveData<>();
 
     public static ContactsRepository getInstance(ContactsDao dao) {
         if(INSTANCE == null) {
@@ -37,17 +35,14 @@ public class ContactsRepository implements ContactsSource, ContactsDao.DaoCallba
         mContactsDao = dao;
     }
 
-    @Override
     public MutableLiveData<List<Contact>> getPhonesData() {
         return mPhones;
     }
 
-    @Override
     public MutableLiveData<List<Contact>> getEmailsData() {
         return mEmails;
     }
 
-    @Override
     public void loadContacts() {
         // Load the user's phone and email contacts.
         if(mCachedResult == null) {
@@ -59,7 +54,6 @@ public class ContactsRepository implements ContactsSource, ContactsDao.DaoCallba
         }
     }
 
-    @Override
     public void filter(String constraint) {
         if(mCachedResult == null) return;
 
@@ -76,7 +70,6 @@ public class ContactsRepository implements ContactsSource, ContactsDao.DaoCallba
         mEmailsFilterTask.execute();
     }
 
-    @Override
     public void clear() {
         mCachedResult = null;
     }

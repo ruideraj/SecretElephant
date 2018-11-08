@@ -62,7 +62,7 @@ public class ContactsInputAdapter extends RecyclerView.Adapter {
             vh.contactName.setText(contact.getName());
         }
         else if(type == TYPE_EDIT) {
-            vh.edit.setText(mViewModel.searchText);
+            vh.edit.setText(mViewModel.getSearchText());
         }
     }
 

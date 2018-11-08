@@ -76,7 +76,7 @@ public class MainViewModelTest {
         assertFalse(mMainViewModel.signedIn.getValue());
 
         assertNotNull(mMainViewModel.signOutMessage.getValue());
-        assertEquals((int) mMainViewModel.signOutMessage.getValue(), R.string.main_menu_signed_out);
+        assertEquals(R.string.main_menu_signed_out, (int) mMainViewModel.signOutMessage.getValue());
     }
 
     @Test
@@ -84,6 +84,6 @@ public class MainViewModelTest {
         mMainViewModel.onSignOutFailure();
 
         assertNotNull(mMainViewModel.signOutMessage.getValue());
-        assertEquals((int) mMainViewModel.signOutMessage.getValue(), R.string.main_menu_sign_out_failed);
+        assertEquals(R.string.main_menu_sign_out_failed, (int) mMainViewModel.signOutMessage.getValue());
     }
 }
