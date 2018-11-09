@@ -1,84 +1,111 @@
 package com.ruideraj.secretelephant.send;
 
+import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
-import android.telephony.SmsManager;
-import android.text.TextUtils;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.Base64;
-import com.google.api.client.util.ExponentialBackOff;
-import com.google.api.services.gmail.Gmail;
-import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.Message;
 import com.ruideraj.secretelephant.BuildConfig;
 import com.ruideraj.secretelephant.Constants;
 import com.ruideraj.secretelephant.PropertiesReader;
 import com.ruideraj.secretelephant.R;
+import com.ruideraj.secretelephant.SingleLiveEvent;
 import com.ruideraj.secretelephant.contacts.Contact;
 import com.ruideraj.secretelephant.match.MatchExchange;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-public class Sender {
+public class SendRepository {
 
-    private static final String[] SCOPES = { GmailScopes.GMAIL_SEND };
-    private static final int THREADS = 5;
-
-    private List<SendService.SendListener> mListeners = new ArrayList<>();
+    private static volatile SendRepository INSTANCE;
+    private static final Object sLock = new Object();
 
     private Context mContext;
 
-    private ExecutorService mExecutorService = Executors.newFixedThreadPool(THREADS);
-    private Handler mHandler = new Handler(Looper.getMainLooper());
+    private SendRunner mRunner;
 
-    private SmsManager mSmsManager;
-    private String mAccountName = null;
-    private Gmail mGmail = null;
+    private SmsSender mSmsSender;
+    private EmailSender mEmailSender;
 
-    private List<SendInvite> mInvites;
+    private final MutableLiveData<List<SendInvite>> invites = new MutableLiveData<>();
+    private final SingleLiveEvent<Integer> lastUpdatedPosition = new SingleLiveEvent<>();
 
-    public Sender(Context context) {
+    public static SendRepository getInstance(Context context, SendRunner runner,
+                                             SmsSender smsSender, EmailSender emailSender) {
+        if(INSTANCE == null) {
+            synchronized(sLock) {
+                if(INSTANCE == null) {
+                    INSTANCE = new SendRepository(context, runner, smsSender, emailSender);
+                }
+            }
+        }
+
+        return INSTANCE;
+    }
+
+    public SendRepository(Context context, SendRunner runner,
+                  SmsSender smsSender, EmailSender emailSender) {
         mContext = context;
+        mRunner = runner;
+        mSmsSender = smsSender;
+        mEmailSender = emailSender;
+    }
+
+    MutableLiveData<List<SendInvite>> getInvites() {
+        return invites;
+    }
+
+    SingleLiveEvent<Integer> getLastUpdatedPosition() {
+        return lastUpdatedPosition;
+    }
+
+    void setInvites(List<SendInvite> list) {
+        invites.setValue(list);
+    }
+
+    void setEmailAccount(String emailAccount) {
+        mEmailSender.setEmailAccount(emailAccount);
+    }
+
+    void setStatus(int position, int status, Exception e) {
+        List<SendInvite> list = invites.getValue();
+
+        if(list != null) {
+            SendInvite invite = list.get(position);
+            invite.setStatus(status);
+            invite.setException(e);
+
+            lastUpdatedPosition.setValue(position);
+        }
     }
 
     public void send(MatchExchange exchange) {
         SendListTask task = new SendListTask(exchange);
-        mExecutorService.submit(task);
+        mRunner.runBackground(task);
     }
 
     public void resend(int position) {
-        if(mInvites != null && position < mInvites.size()) {
-            SendInvite invite = mInvites.get(position);
-            invite.setStatus(SendInvite.IN_PROGRESS);
+        List<SendInvite> list = invites.getValue();
+        if(list != null && position < list.size()) {
+            int status = SendInvite.IN_PROGRESS;
+            SendInvite invite = list.get(position);
+            invite.setStatus(status);
             invite.setException(null);
 
-            for(SendService.SendListener listener : mListeners) {
-                listener.sendItemUpdated(position);
-            }
+            setStatus(position, status, null);
 
             SendTask task = new SendTask(position, invite);
-            mExecutorService.submit(task);
+            mRunner.runBackground(task);
         }
     }
 
@@ -108,69 +135,30 @@ public class Sender {
         return invites;
     }
 
-    public interface SendListener {
-        void sendListCreated(List<SendInvite> invites);
-        void sendItemUpdated(int position);
-        void sendCompleted();
-    }
-
     private class SendListTask implements Runnable {
         private MatchExchange mExchange;
 
-        public SendListTask(MatchExchange exchange) {
+        SendListTask(MatchExchange exchange) {
             mExchange = exchange;
         }
 
         @Override
         public void run() {
-            // TODO
-            // Could pass in flags where we only initialize Sms or Gmail if
-            // phone contacts or email contacts are present.
-
-            mSmsManager = SmsManager.getDefault();
-
-            GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(mContext);
-            if(googleAccount != null) {
-                mAccountName = googleAccount.getEmail();
-            }
-
-            if(!TextUtils.isEmpty(mAccountName)) {
-                GoogleAccountCredential credential = GoogleAccountCredential
-                        .usingOAuth2(mContext, Arrays.asList(SCOPES))
-                        .setBackOff(new ExponentialBackOff());
-                credential.setSelectedAccountName(mAccountName);
-                HttpTransport transport = AndroidHttp.newCompatibleTransport();
-                JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-                mGmail = new Gmail.Builder(transport, jsonFactory, credential)
-                        .setApplicationName(mContext.getString(R.string.app_name)).build();
-            }
-            else {
-                // TODO
-                // Need to handle the case where the user for some reason revokes
-                // access to their Google account right before sending the invites.
-            }
-
-
             // Build Invite objects.
             /* TODO
              *  Can store them in local database to allow retries when an error occurs or the
              *  app is stopped/placed in background.
              */
-            final List<SendInvite> invites = buildInvites(mExchange.getContacts(),
+            final List<SendInvite> list = buildInvites(mExchange.getContacts(),
                     mExchange.getMatches(), mExchange.getMode());
 
             // Set newly created list of invites on the UI thread.
-            mHandler.post(() -> {
-                mInvites = invites;
-                for(SendService.SendListener listener : mListeners) {
-                    listener.sendListCreated(mInvites);
-                }
-            });
+            mRunner.runUi(() -> setInvites(list));
 
             // Post each invite as a task for the ExecutorService.
-            for(int i = 0; i < invites.size(); i++) {
-                SendTask task = new SendTask(i, invites.get(i));
-                mExecutorService.submit(task);
+            for(int i = 0; i < list.size(); i++) {
+                SendTask task = new SendTask(i, list.get(i));
+                mRunner.runBackground(task);
             }
         }
     }
@@ -180,7 +168,7 @@ public class Sender {
         private int mPosition;
         private SendInvite mInvite;
 
-        public SendTask(int position, SendInvite invite) {
+        SendTask(int position, SendInvite invite) {
             mPosition = position;
             mInvite = invite;
         }
@@ -209,8 +197,7 @@ public class Sender {
                     // TODO Add logic to use real phone number.
                 }
                 try {
-                    mSmsManager.sendTextMessage(destination,
-                            null, mInvite.getMessage(), null, null);
+                    mSmsSender.sendMessage(destination, mInvite.getMessage());
                 }
                 catch(IllegalArgumentException e) {
                     if(BuildConfig.DEBUG) e.printStackTrace();
@@ -218,7 +205,7 @@ public class Sender {
                 }
             }
             else if(mInvite.getContact().getType() == Contact.TYPE_EMAIL) {
-                if(mGmail != null) {
+                if(mEmailSender.isEmailAccountPresent()) {
                     // Build email object.
                     Properties props = new Properties();
                     Session session = Session.getDefaultInstance(props);
@@ -244,7 +231,7 @@ public class Sender {
                         String encodedEmail = Base64.encodeBase64URLSafeString(bytes);
                         Message message = new Message();
                         message.setRaw(encodedEmail);
-                        mGmail.users().messages().send(mAccountName, message).execute();
+                        mEmailSender.sendEmail("me", message);
                     }
                     catch(MessagingException me) {
                         if(BuildConfig.DEBUG) me.printStackTrace();
@@ -256,8 +243,8 @@ public class Sender {
                     }
                 }
                 else {
-                    // If Gmail object is null, no account name/email was set,
-                    // meaning the user may have revoked account permission.
+                    // If no account name/email was set,
+                    // the user may have revoked account permission.
                     // Create a generic Exception to indicate that we couldn't send the email.
                     exception = new Exception(mContext.getString(R.string.send_error_no_gmail));
                 }
@@ -265,34 +252,26 @@ public class Sender {
 
             // Set the item status and update the UI.
             int status = exception == null ? SendInvite.SENT : SendInvite.ERROR;
-            ItemUpdateTask task = new ItemUpdateTask(mPosition, mInvite, status, exception);
-            mHandler.post(task);
+            ItemUpdateTask task = new ItemUpdateTask(mPosition, status, exception);
+            mRunner.runUi(task);
         }
     }
 
     private class ItemUpdateTask implements Runnable {
 
         private int mPosition;
-        private SendInvite mInvite;
         private int mStatus;
         private Exception mException;
 
-        public ItemUpdateTask(int position, SendInvite invite, int status, Exception e) {
+        ItemUpdateTask(int position, int status, Exception e) {
             mPosition = position;
-            mInvite = invite;
             mStatus = status;
             mException = e;
         }
 
         @Override
         public void run() {
-            mInvite.setStatus(mStatus);
-            mInvite.setException(mException);
-
-            for(SendService.SendListener listener : mListeners) {
-                listener.sendItemUpdated(mPosition);
-            }
+            setStatus(mPosition, mStatus, mException);
         }
     }
-
 }

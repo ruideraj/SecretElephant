@@ -3,12 +3,21 @@ package com.ruideraj.secretelephant;
 import android.app.Application;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
+import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.telephony.SmsManager;
 
 import com.ruideraj.secretelephant.contacts.ContactsDao;
 import com.ruideraj.secretelephant.contacts.ContactsRepository;
 import com.ruideraj.secretelephant.contacts.ContactsViewModel;
 import com.ruideraj.secretelephant.main.MainViewModel;
+import com.ruideraj.secretelephant.send.EmailSender;
+import com.ruideraj.secretelephant.send.SendRepository;
+import com.ruideraj.secretelephant.send.SendRunner;
+import com.ruideraj.secretelephant.send.SendViewModel;
+import com.ruideraj.secretelephant.send.SmsSender;
 
 public class ViewModelFactory implements ViewModelProvider.Factory {
 
@@ -50,6 +59,18 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
 
             //noinspection unchecked
             return (T) new ContactsViewModel(contactsRepository, accountManager);
+        } else if (modelClass.isAssignableFrom(SendViewModel.class)) {
+            SendRunner runner = SendRunner.getInstance(AsyncTask.THREAD_POOL_EXECUTOR,
+                    new Handler(Looper.getMainLooper()));
+            SmsSender smsSender = SmsSender.getInstance(SmsManager.getDefault());
+            EmailSender emailSender = EmailSender.getInstance(mApplication);
+
+            SendRepository sendRepository = SendRepository.getInstance(mApplication, runner,
+                    smsSender, emailSender);
+            AccountManager accountManager = AccountManager.getInstance(mApplication);
+
+            //noinspection unchecked
+            return (T) new SendViewModel(sendRepository, accountManager);
         }
 
         throw new IllegalArgumentException("Unknown ViewModel class: " + modelClass.getName());

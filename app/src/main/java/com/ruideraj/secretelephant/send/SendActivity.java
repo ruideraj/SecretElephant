@@ -7,10 +7,12 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.ruideraj.secretelephant.Constants;
 import com.ruideraj.secretelephant.R;
+import com.ruideraj.secretelephant.ViewModelFactory;
 import com.ruideraj.secretelephant.match.MatchExchange;
 
 public class SendActivity extends AppCompatActivity implements SendAdapter.SendClickListener {
@@ -19,6 +21,9 @@ public class SendActivity extends AppCompatActivity implements SendAdapter.SendC
 
     private RecyclerView mRecycler;
     private SendAdapter mAdapter;
+
+    private TextView mText;
+    private ProgressBar mProgress;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -30,18 +35,36 @@ public class SendActivity extends AppCompatActivity implements SendAdapter.SendC
         mAdapter = new SendAdapter(this);
         mRecycler.setAdapter(mAdapter);
 
-        mViewModel = ViewModelProviders.of(this).get(SendViewModel.class);
+        mText = findViewById(R.id.send_list_text);
+        mProgress = findViewById(R.id.send_list_progress);
+
+        mViewModel = ViewModelProviders.of(this,
+                ViewModelFactory.getInstance(getApplication())).get(SendViewModel.class);
 
         mViewModel.invitesData.observe(this, invites -> {
             if(invites != null) {
                 mAdapter.setData(invites);
-                findViewById(R.id.send_list_text).setVisibility(View.GONE);
-                findViewById(R.id.send_list_progress).setVisibility(View.GONE);
-                mRecycler.setVisibility(View.VISIBLE);
             }
         });
 
-        mViewModel.updatedPosition.observe(this, position -> mAdapter.notifyItemChanged(position));
+        mViewModel.updatedPosition.observe(this, position -> {
+            if(position != null) {
+                mAdapter.notifyItemChanged(position);
+            }
+        });
+
+        mViewModel.listVisibility.observe(this, visibility -> {
+            if(visibility != null) {
+                mRecycler.setVisibility(visibility);
+            }
+        });
+
+        mViewModel.progressVisibility.observe(this, visibility -> {
+            if(visibility != null) {
+                mText.setVisibility(visibility);
+                mProgress.setVisibility(visibility);
+            }
+        });
 
         if(savedInstanceState == null) {
             // If we are not recreating the Activity, get invite data and start the service.
@@ -58,6 +81,13 @@ public class SendActivity extends AppCompatActivity implements SendAdapter.SendC
             // action/permission.
         }
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        // TODO Cancel sending invites when user backs out.
     }
 
     @Override

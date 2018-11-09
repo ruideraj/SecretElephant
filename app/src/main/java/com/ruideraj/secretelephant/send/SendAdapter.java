@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.ruideraj.secretelephant.ADB;
 import com.ruideraj.secretelephant.R;
 import com.ruideraj.secretelephant.contacts.Contact;
 
@@ -77,6 +78,7 @@ public class SendAdapter extends RecyclerView.Adapter {
 
     public void setData(List<SendInvite> invites) {
         mInvites = invites;
+        notifyDataSetChanged();
     }
 
     public interface SendClickListener {

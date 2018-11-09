@@ -28,7 +28,6 @@
         <activity android:name=".send.SendActivity"
             android:label="@string/send_title"/>
 
-        <service android:name=".send.SendService" />
     </application>
 
 </manifest>
