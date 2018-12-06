@@ -51,8 +51,6 @@ public class ContactsViewModelTest {
         when(mContactsRepository.getPhonesData()).thenReturn(new MutableLiveData<>());
         when(mContactsRepository.getEmailsData()).thenReturn(new MutableLiveData<>());
 
-
-
         mContactsViewModel = new ContactsViewModel(mContactsRepository, mAccountManager);
     }
 
