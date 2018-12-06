@@ -30,6 +30,7 @@
     <string name="send_elephant">your number is</string>
     <string name="send_sending">Sending Invites&#8230;</string>
     <string name="send_error_no_gmail">No email account set.</string>
+    <string name="send_successful">All invites succesfully sent!</string>
 
     <string name="action_continue">Continue</string>
     <string name="action_reorder">Reorder</string>

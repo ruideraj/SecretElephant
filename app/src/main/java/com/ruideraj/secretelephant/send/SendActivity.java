@@ -9,10 +9,12 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ruideraj.secretelephant.Constants;
 import com.ruideraj.secretelephant.R;
 import com.ruideraj.secretelephant.ViewModelFactory;
+import com.ruideraj.secretelephant.main.MainActivity;
 import com.ruideraj.secretelephant.match.MatchExchange;
 
 public class SendActivity extends AppCompatActivity implements SendAdapter.SendClickListener {
@@ -51,6 +53,12 @@ public class SendActivity extends AppCompatActivity implements SendAdapter.SendC
             if(position != null) {
                 mAdapter.notifyItemChanged(position);
             }
+        });
+
+        mViewModel.queueFinished.observe(this, aVoid -> goBackToMain());
+
+        mViewModel.toast.observe(this, stringId -> {
+            if(stringId != null) Toast.makeText(this, stringId, Toast.LENGTH_SHORT).show();
         });
 
         mViewModel.listVisibility.observe(this, visibility -> {
@@ -93,5 +101,11 @@ public class SendActivity extends AppCompatActivity implements SendAdapter.SendC
     @Override
     public void onRefreshClick(int position) {
         mViewModel.onRefreshClick(position);
+    }
+
+    private void goBackToMain() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
     }
 }

@@ -20,6 +20,7 @@ import java.util.Arrays;
 public class EmailSender {
 
     private static final String[] SCOPES = { GmailScopes.GMAIL_SEND };
+    private static final int BACKOFF_MAX_ELAPSED = 8000;
 
     private static volatile EmailSender INSTANCE;
     private static final Object sLock = new Object();
@@ -49,9 +50,12 @@ public class EmailSender {
 
     public void setEmailAccount(String emailAccount) {
         if(!TextUtils.isEmpty(emailAccount)) {
+            ExponentialBackOff backOff = new ExponentialBackOff.Builder()
+                    .setMaxElapsedTimeMillis(BACKOFF_MAX_ELAPSED).build();
+
             GoogleAccountCredential credential = GoogleAccountCredential
                     .usingOAuth2(mContext, Arrays.asList(SCOPES))
-                    .setBackOff(new ExponentialBackOff());
+                    .setBackOff(backOff);
             credential.setSelectedAccountName(emailAccount);
             HttpTransport transport = AndroidHttp.newCompatibleTransport();
             JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();

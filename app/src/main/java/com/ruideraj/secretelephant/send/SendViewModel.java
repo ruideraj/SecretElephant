@@ -1,11 +1,15 @@
 package com.ruideraj.secretelephant.send;
 
 import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModel;
+import android.support.annotation.Nullable;
 import android.view.View;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.ruideraj.secretelephant.AccountManager;
+import com.ruideraj.secretelephant.R;
+import com.ruideraj.secretelephant.SingleLiveEvent;
 import com.ruideraj.secretelephant.match.MatchExchange;
 
 import java.util.List;
@@ -13,26 +17,46 @@ import java.util.List;
 public class SendViewModel extends ViewModel implements SendAdapter.SendClickListener {
 
     public final MutableLiveData<List<SendInvite>> invitesData;
-    public final MutableLiveData<Integer> updatedPosition;
+    public final SingleLiveEvent<Integer> updatedPosition = new SingleLiveEvent<>();
+    public final SingleLiveEvent<Void> queueFinished = new SingleLiveEvent<>();
 
+    public final SingleLiveEvent<Integer> toast = new SingleLiveEvent<>();
     public final MutableLiveData<Integer> listVisibility = new MutableLiveData<>();
     public final MutableLiveData<Integer> progressVisibility = new MutableLiveData<>();
 
     private SendRepository mRepository;
     private AccountManager mAccountManager;
 
+    private Observer<int[]> mUpdateObserver;
+
+    private int mTotalInvites;
+    private int mInvitesSent;
+
     public SendViewModel(SendRepository repository, AccountManager accountManager) {
         mRepository = repository;
         invitesData = mRepository.getInvites();
-        updatedPosition = mRepository.getLastUpdatedPosition();
+
+        mUpdateObserver = (update) -> onUpdatedPosition(update);
+        repository.getLastUpdatedPosition().observeForever(mUpdateObserver);
+
         mAccountManager = accountManager;
 
         progressVisibility.setValue(View.VISIBLE);
         listVisibility.setValue(View.GONE);
     }
 
-    public void sendInvites(MatchExchange exchange) {
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        mRepository.getLastUpdatedPosition().removeObserver(mUpdateObserver);
+    }
+
+    void sendInvites(MatchExchange exchange) {
         setEmailAccount(mAccountManager.getAccount());
+
+        mTotalInvites = exchange.getContacts().size();
+        mInvitesSent = 0;
+
         mRepository.send(exchange);
 
         progressVisibility.setValue(View.GONE);
@@ -46,6 +70,22 @@ public class SendViewModel extends ViewModel implements SendAdapter.SendClickLis
         else {
             mRepository.setEmailAccount(null);
         }
+    }
+
+    private void onUpdatedPosition(int[] update) {
+        int position = update[0];
+        int status = update[1];
+
+        if(status == SendInvite.SENT) {
+            mInvitesSent++;
+        }
+
+        if(mInvitesSent == mTotalInvites) {
+            toast.setValue(R.string.send_successful);
+            queueFinished.call();
+        }
+
+        updatedPosition.setValue(position);
     }
 
     @Override

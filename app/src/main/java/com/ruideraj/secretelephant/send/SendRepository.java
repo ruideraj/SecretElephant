@@ -38,7 +38,7 @@ public class SendRepository {
     private EmailSender mEmailSender;
 
     private final MutableLiveData<List<SendInvite>> invites = new MutableLiveData<>();
-    private final SingleLiveEvent<Integer> lastUpdatedPosition = new SingleLiveEvent<>();
+    private final SingleLiveEvent<int[]> lastUpdatedPosition = new SingleLiveEvent<>();
 
     public static SendRepository getInstance(Context context, SendRunner runner,
                                              SmsSender smsSender, EmailSender emailSender) {
@@ -65,11 +65,11 @@ public class SendRepository {
         return invites;
     }
 
-    SingleLiveEvent<Integer> getLastUpdatedPosition() {
+    SingleLiveEvent<int[]> getLastUpdatedPosition() {
         return lastUpdatedPosition;
     }
 
-    void setInvites(List<SendInvite> list) {
+    private void setInvites(List<SendInvite> list) {
         invites.setValue(list);
     }
 
@@ -77,7 +77,7 @@ public class SendRepository {
         mEmailSender.setEmailAccount(emailAccount);
     }
 
-    void setStatus(int position, int status, Exception e) {
+    private void setStatus(int position, int status, Exception e) {
         List<SendInvite> list = invites.getValue();
 
         if(list != null) {
@@ -85,7 +85,11 @@ public class SendRepository {
             invite.setStatus(status);
             invite.setException(e);
 
-            lastUpdatedPosition.setValue(position);
+            int[] update = new int[2];
+            update[0] = position;
+            update[1] = status;
+
+            lastUpdatedPosition.setValue(update);
         }
     }
 
