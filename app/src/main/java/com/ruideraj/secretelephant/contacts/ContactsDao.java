@@ -9,6 +9,10 @@ import com.ruideraj.secretelephant.ADB;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 public class ContactsDao {
 
     private static String[] CONTACT_PROJECTION = {
@@ -23,23 +27,9 @@ public class ContactsDao {
     private static String[] EMAILS_PROJECTION = {
             ContactsContract.CommonDataKinds.Email.DATA };
 
-    private static volatile ContactsDao INSTANCE;
-    private static final Object sLock = new Object();
-
     private Application mApplication;
 
-    public static ContactsDao getInstance(Application application) {
-        if(INSTANCE == null) {
-            synchronized(sLock) {
-                if(INSTANCE == null) {
-                    INSTANCE = new ContactsDao(application);
-                }
-            }
-        }
-
-        return INSTANCE;
-    }
-
+    @Inject
     public ContactsDao(Application application) {
         mApplication = application;
     }

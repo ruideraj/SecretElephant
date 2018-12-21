@@ -54,7 +54,7 @@ public class ContactsActivity extends AppCompatActivity implements TextWatcher {
         setContentView(R.layout.activity_contacts);
 
         mContactsViewModel = ViewModelProviders.of(this,
-                ViewModelFactory.getInstance(getApplication())).get(ContactsViewModel.class);
+                new ViewModelFactory(this)).get(ContactsViewModel.class);
 
         mViewPager = findViewById(R.id.contacts_viewpager);
         ContactsPagerAdapter adapter = new ContactsPagerAdapter(getSupportFragmentManager());

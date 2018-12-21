@@ -11,27 +11,17 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.Task;
 import com.google.api.services.gmail.GmailScopes;
 
-public class AccountManager {
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
-    private static volatile AccountManager INSTANCE;
-    private static final Object sLock = new Object();
+@Singleton
+public class AccountManager {
 
     private Application mApplication;
     private GoogleSignInClient mGoogleClient;
 
-    public static AccountManager getInstance(Application application) {
-        if(INSTANCE == null) {
-            synchronized(sLock) {
-                if(INSTANCE == null) {
-                    INSTANCE = new AccountManager(application);
-                }
-            }
-        }
-
-        return INSTANCE;
-    }
-
-    private AccountManager(Application application) {
+    @Inject
+    public AccountManager(Application application) {
         mApplication = application;
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder().requestEmail()

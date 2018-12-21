@@ -41,7 +41,7 @@ public class SendActivity extends AppCompatActivity implements SendAdapter.SendC
         mProgress = findViewById(R.id.send_list_progress);
 
         mViewModel = ViewModelProviders.of(this,
-                ViewModelFactory.getInstance(getApplication())).get(SendViewModel.class);
+                new ViewModelFactory(this)).get(SendViewModel.class);
 
         mViewModel.invitesData.observe(this, invites -> {
             if(invites != null) {

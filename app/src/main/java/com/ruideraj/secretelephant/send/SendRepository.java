@@ -9,6 +9,7 @@ import com.ruideraj.secretelephant.BuildConfig;
 import com.ruideraj.secretelephant.Constants;
 import com.ruideraj.secretelephant.PropertiesReader;
 import com.ruideraj.secretelephant.R;
+import com.ruideraj.secretelephant.Runner;
 import com.ruideraj.secretelephant.SingleLiveEvent;
 import com.ruideraj.secretelephant.contacts.Contact;
 import com.ruideraj.secretelephant.match.MatchExchange;
@@ -27,38 +28,25 @@ import javax.mail.internet.MimeMessage;
 
 public class SendRepository {
 
-    private static volatile SendRepository INSTANCE;
-    private static final Object sLock = new Object();
-
     private Context mContext;
 
-    private SendRunner mRunner;
+    private Runner mRunner;
 
     private SmsSender mSmsSender;
     private EmailSender mEmailSender;
 
+    private PropertiesReader mPropertiesReader;
+
     private final MutableLiveData<List<SendInvite>> invites = new MutableLiveData<>();
     private final SingleLiveEvent<int[]> lastUpdatedPosition = new SingleLiveEvent<>();
 
-    public static SendRepository getInstance(Context context, SendRunner runner,
-                                             SmsSender smsSender, EmailSender emailSender) {
-        if(INSTANCE == null) {
-            synchronized(sLock) {
-                if(INSTANCE == null) {
-                    INSTANCE = new SendRepository(context, runner, smsSender, emailSender);
-                }
-            }
-        }
-
-        return INSTANCE;
-    }
-
-    public SendRepository(Context context, SendRunner runner,
-                  SmsSender smsSender, EmailSender emailSender) {
+    public SendRepository(Context context, Runner runner,
+                          SmsSender smsSender, EmailSender emailSender, PropertiesReader propertiesReader) {
         mContext = context;
         mRunner = runner;
         mSmsSender = smsSender;
         mEmailSender = emailSender;
+        mPropertiesReader = propertiesReader;
     }
 
     MutableLiveData<List<SendInvite>> getInvites() {
@@ -194,7 +182,7 @@ public class SendRepository {
             if(mInvite.getContact().getType() == Contact.TYPE_PHONE) {
                 String destination = null;
                 if(BuildConfig.DEBUG) {
-                    destination = PropertiesReader.getProperty(mContext,
+                    destination = mPropertiesReader.getProperty(
                             mContext.getString(R.string.test_send_key_phone));
                 }
                 else {
@@ -219,7 +207,7 @@ public class SendRepository {
                     try {
                         String recipient = null;
                         if(BuildConfig.DEBUG) {
-                            recipient = PropertiesReader.getProperty(mContext,
+                            recipient = mPropertiesReader.getProperty(
                                     mContext.getString(R.string.test_send_key_email));
                         }
                         else {

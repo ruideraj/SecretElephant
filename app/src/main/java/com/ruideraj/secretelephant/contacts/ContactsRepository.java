@@ -6,10 +6,11 @@ import android.os.AsyncTask;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContactsRepository implements ContactsDao.DaoCallback {
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
-    private static volatile ContactsRepository INSTANCE;
-    private static final Object sLock = new Object();
+@Singleton
+public class ContactsRepository implements ContactsDao.DaoCallback {
 
     private ContactsDao mContactsDao;
     private ContactsResult mCachedResult;
@@ -19,18 +20,7 @@ public class ContactsRepository implements ContactsDao.DaoCallback {
     private final MutableLiveData<List<Contact>> mPhones = new MutableLiveData<>();
     private final MutableLiveData<List<Contact>> mEmails = new MutableLiveData<>();
 
-    public static ContactsRepository getInstance(ContactsDao dao) {
-        if(INSTANCE == null) {
-            synchronized(sLock) {
-                if(INSTANCE == null) {
-                    INSTANCE = new ContactsRepository(dao);
-                }
-            }
-        }
-
-        return INSTANCE;
-    }
-
+    @Inject
     public ContactsRepository(ContactsDao dao) {
         mContactsDao = dao;
     }

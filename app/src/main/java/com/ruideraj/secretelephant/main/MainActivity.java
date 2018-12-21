@@ -10,7 +10,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.ruideraj.secretelephant.ADB;
 import com.ruideraj.secretelephant.Constants;
 import com.ruideraj.secretelephant.R;
 import com.ruideraj.secretelephant.ViewModelFactory;
@@ -28,7 +27,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.main_button_elephant).setOnClickListener(this);
         findViewById(R.id.main_button_santa).setOnClickListener(this);
 
-        mViewModel = ViewModelProviders.of(this, ViewModelFactory.getInstance(getApplication())).get(MainViewModel.class);
+        mViewModel = ViewModelProviders.of(this, new ViewModelFactory(this)).get(MainViewModel.class);
 
         mViewModel.signedIn.observe(this, signedIn -> invalidateOptionsMenu());
 

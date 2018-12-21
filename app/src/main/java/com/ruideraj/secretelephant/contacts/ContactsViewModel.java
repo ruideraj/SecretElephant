@@ -26,8 +26,8 @@ import java.util.Set;
 
 public class ContactsViewModel extends ViewModel {
 
-    public final MutableLiveData<List<Contact>> phones;
-    public final MutableLiveData<List<Contact>> emails;
+    public final MediatorLiveData<List<Contact>> phones = new MediatorLiveData<>();
+    public final MediatorLiveData<List<Contact>> emails = new MediatorLiveData<>();
 
     public final List<Contact> selectedContacts = new ArrayList<>();
     public final Set<String> selectedData = new HashSet<>();
@@ -53,8 +53,8 @@ public class ContactsViewModel extends ViewModel {
     public ContactsViewModel(ContactsRepository contactsRepository, AccountManager accountManager) {
         mContactsRepository = contactsRepository;
         mAccountManager = accountManager;
-        phones = mContactsRepository.getPhonesData();
-        emails = mContactsRepository.getEmailsData();
+        phones.addSource(mContactsRepository.getPhonesData(), phones::setValue);
+        emails.addSource(mContactsRepository.getEmailsData(), emails::setValue);
         showSelection.addSource(phones, phoneList -> setListVisibility());
         showSelection.addSource(emails, emailList -> setListVisibility());
 
