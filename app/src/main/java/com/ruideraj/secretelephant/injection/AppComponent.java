@@ -10,6 +10,7 @@ public interface AppComponent {
 
     MainComponent getMainComponent();
     ContactsComponent getContactsComponent();
+    MatchComponent getMatchComponent();
     SendComponent getSendComponent(ContextModule contextModule);
 
 }

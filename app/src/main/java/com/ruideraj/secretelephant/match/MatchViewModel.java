@@ -6,6 +6,7 @@ import android.content.Intent;
 
 import com.ruideraj.secretelephant.Constants;
 import com.ruideraj.secretelephant.R;
+import com.ruideraj.secretelephant.Runner;
 import com.ruideraj.secretelephant.SingleLiveEvent;
 import com.ruideraj.secretelephant.contacts.Contact;
 
@@ -14,9 +15,15 @@ import java.util.ArrayList;
 public class MatchViewModel extends ViewModel {
 
     public MutableLiveData<Integer> textId = new MutableLiveData<>();
-    public MatchExchangeLiveData exchange = new MatchExchangeLiveData();
+    public MutableLiveData<MatchExchange> exchange = new MutableLiveData<>();
 
     public SingleLiveEvent<Void> noContacts = new SingleLiveEvent<>();
+
+    private Runner mRunner;
+
+    public MatchViewModel(Runner runner) {
+        mRunner = runner;
+    }
 
     public void processIntent(Intent intent) {
         ArrayList<Contact> contacts = intent.getParcelableArrayListExtra(Constants.KEY_SELECTED);
@@ -38,14 +45,55 @@ public class MatchViewModel extends ViewModel {
                 textId.setValue(R.string.match_elephant);
             }
 
-            exchange.createExchange(contacts, mode);
+            OrderTask orderTask = new OrderTask(contacts, mode);
+            mRunner.runBackground(orderTask);
         }
     }
 
     public void reorder() {
         MatchExchange ex = exchange.getValue();
         if(ex != null) {
-            createMatches(ex.getContacts(), ex.getMode());
+            int[] order = getOrder(ex.getContacts().size(), ex.getMode());
+            ex.setMatches(order);
+            exchange.setValue(ex);
+        }
+    }
+
+    private int[] getOrder(int size, int mode) {
+        boolean checkOrder = mode == Constants.MODE_SANTA;
+        return MatchMaker.match(size, checkOrder);
+    }
+
+    // Ordering done inside a background Runnable in case of large number
+    // of selected contacts or if in the future we implement more sophisticated ordering logic
+    // e.g. exclusion rules
+    private class OrderTask implements Runnable {
+        ArrayList<Contact> mContacts;
+        int mMode;
+
+        public OrderTask(ArrayList<Contact> contacts, int mode) {
+            mContacts = contacts;
+            mMode = mode;
+        }
+
+        @Override
+        public void run() {
+            int[] order = getOrder(mContacts.size(), mMode);
+            OrderUpdateTask updateTask = new OrderUpdateTask(mContacts, order, mMode);
+            mRunner.runUi(updateTask);
+        }
+    }
+
+    private class OrderUpdateTask implements Runnable {
+        MatchExchange ex;
+
+        public OrderUpdateTask(ArrayList<Contact> contacts, int[] order, int mode) {
+            ex = new MatchExchange(contacts, order, mode);
+        }
+
+        @Override
+        public void run() {
+            exchange.setValue(ex);
         }
     }
 }

@@ -11,8 +11,10 @@ import com.ruideraj.secretelephant.injection.AppComponent;
 import com.ruideraj.secretelephant.injection.ContactsComponent;
 import com.ruideraj.secretelephant.injection.ContextModule;
 import com.ruideraj.secretelephant.injection.MainComponent;
+import com.ruideraj.secretelephant.injection.MatchComponent;
 import com.ruideraj.secretelephant.injection.SendComponent;
 import com.ruideraj.secretelephant.main.MainViewModel;
+import com.ruideraj.secretelephant.match.MatchViewModel;
 import com.ruideraj.secretelephant.send.SendRepository;
 import com.ruideraj.secretelephant.send.SendViewModel;
 
@@ -43,6 +45,13 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
 
             //noinspection unchecked
             return (T) new ContactsViewModel(contactsRepository, accountManager);
+        }
+        else if(modelClass.isAssignableFrom(MatchViewModel.class)) {
+            MatchComponent matchComponent = appComponent.getMatchComponent();
+            Runner runner = matchComponent.runner();
+
+            //noinspection unchecked
+            return (T) new MatchViewModel(runner);
         }
         else if (modelClass.isAssignableFrom(SendViewModel.class)) {
             SendComponent sendComponent = appComponent.getSendComponent(new ContextModule(mContext));

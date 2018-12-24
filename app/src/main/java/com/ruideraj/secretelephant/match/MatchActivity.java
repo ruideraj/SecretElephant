@@ -20,10 +20,8 @@ import android.widget.Toast;
 
 import com.ruideraj.secretelephant.Constants;
 import com.ruideraj.secretelephant.R;
-import com.ruideraj.secretelephant.contacts.Contact;
+import com.ruideraj.secretelephant.ViewModelFactory;
 import com.ruideraj.secretelephant.send.SendActivity;
-
-import java.util.ArrayList;
 
 /**
  * Activity where user's selected contacts are matched with numbers or gift recipients based on
@@ -48,7 +46,8 @@ public class MatchActivity extends AppCompatActivity {
         recycler.setLayoutManager(manager);
         recycler.setAdapter(mAdapter);
 
-        mMatchViewModel = ViewModelProviders.of(this).get(MatchViewModel.class);
+        mMatchViewModel = ViewModelProviders.of(this, new ViewModelFactory(this))
+                .get(MatchViewModel.class);
 
         mMatchViewModel.exchange.observe(this, exchange -> {
             if(exchange == null) return;
