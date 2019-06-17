@@ -21,12 +21,9 @@ public class AccountManager {
     private GoogleSignInClient mGoogleClient;
 
     @Inject
-    public AccountManager(Application application) {
+    public AccountManager(Application application, GoogleSignInClient googleClient) {
         mApplication = application;
-
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder().requestEmail()
-                .requestScopes(new Scope(GmailScopes.GMAIL_SEND)).build();
-        mGoogleClient = GoogleSignIn.getClient(mApplication, gso);
+        mGoogleClient = googleClient;
     }
 
     public GoogleSignInAccount getAccount() {

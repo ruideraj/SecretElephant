@@ -1,14 +1,17 @@
 package com.ruideraj.secretelephant.injection;
 
+import com.ruideraj.secretelephant.main.MainViewModel;
+
 import javax.inject.Singleton;
 
 import dagger.Component;
 
-@Component(modules = {AppModule.class, AccountModule.class, RunnerModule.class})
+@Component(modules = {AppModule.class, GoogleModule.class, RunnerModule.class})
 @Singleton
 public interface AppComponent {
 
-    MainComponent getMainComponent();
+    MainViewModel getMainViewModel();
+
     ContactsComponent getContactsComponent();
     MatchComponent getMatchComponent();
     SendComponent getSendComponent(ContextModule contextModule);

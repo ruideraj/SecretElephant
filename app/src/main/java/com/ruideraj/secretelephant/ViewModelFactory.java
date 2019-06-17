@@ -10,7 +10,6 @@ import com.ruideraj.secretelephant.contacts.ContactsViewModel;
 import com.ruideraj.secretelephant.injection.AppComponent;
 import com.ruideraj.secretelephant.injection.ContactsComponent;
 import com.ruideraj.secretelephant.injection.ContextModule;
-import com.ruideraj.secretelephant.injection.MainComponent;
 import com.ruideraj.secretelephant.injection.MatchComponent;
 import com.ruideraj.secretelephant.injection.SendComponent;
 import com.ruideraj.secretelephant.main.MainViewModel;
@@ -32,11 +31,8 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
         AppComponent appComponent = ((SeApplication) mContext.getApplicationContext()).getAppComponent();
 
         if(modelClass.isAssignableFrom(MainViewModel.class)) {
-            MainComponent mainComponent = appComponent.getMainComponent();
-            AccountManager accountManger = mainComponent.accountManager();
-
             //noinspection unchecked
-            return (T) new MainViewModel(accountManger);
+            return (T) appComponent.getMainViewModel();
         }
         else if(modelClass.isAssignableFrom(ContactsViewModel.class)) {
             ContactsComponent contactsComponent = appComponent.getContactsComponent();

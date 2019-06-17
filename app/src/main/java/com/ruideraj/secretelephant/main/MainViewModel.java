@@ -7,6 +7,8 @@ import com.ruideraj.secretelephant.AccountManager;
 import com.ruideraj.secretelephant.R;
 import com.ruideraj.secretelephant.SingleLiveEvent;
 
+import javax.inject.Inject;
+
 public class MainViewModel extends ViewModel implements AccountManager.AccountListener {
 
     public final MutableLiveData<Boolean> signedIn = new MutableLiveData<>();
@@ -14,6 +16,7 @@ public class MainViewModel extends ViewModel implements AccountManager.AccountLi
 
     private AccountManager mAccountManager;
 
+    @Inject
     public MainViewModel(AccountManager accountManager) {
         mAccountManager = accountManager;
         signedIn.setValue(false);
