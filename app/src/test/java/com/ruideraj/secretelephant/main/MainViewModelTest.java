@@ -1,6 +1,6 @@
 package com.ruideraj.secretelephant.main;
 
-import android.arch.core.executor.testing.InstantTaskExecutorRule;
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.ruideraj.secretelephant.AccountManager;

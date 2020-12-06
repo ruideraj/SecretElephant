@@ -1,7 +1,6 @@
 package com.ruideraj.secretelephant;
 
-import android.app.Application;
-import android.support.multidex.MultiDexApplication;
+import androidx.multidex.MultiDexApplication;
 
 import com.ruideraj.secretelephant.injection.AppComponent;
 import com.ruideraj.secretelephant.injection.AppModule;

@@ -1,6 +1,6 @@
 package com.ruideraj.secretelephant.match
 
-import android.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import android.content.Intent
 import com.ruideraj.secretelephant.contacts.Contact
 import org.junit.Before

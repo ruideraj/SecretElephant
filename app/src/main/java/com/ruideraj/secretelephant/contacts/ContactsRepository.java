@@ -1,6 +1,6 @@
 package com.ruideraj.secretelephant.contacts;
 
-import android.arch.lifecycle.MutableLiveData;
+import androidx.lifecycle.MutableLiveData;
 import android.os.AsyncTask;
 
 import java.util.ArrayList;

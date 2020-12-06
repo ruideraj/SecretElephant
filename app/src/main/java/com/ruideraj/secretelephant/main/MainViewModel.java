@@ -1,7 +1,7 @@
 package com.ruideraj.secretelephant.main;
 
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.ViewModel;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
 import com.ruideraj.secretelephant.AccountManager;
 import com.ruideraj.secretelephant.R;
