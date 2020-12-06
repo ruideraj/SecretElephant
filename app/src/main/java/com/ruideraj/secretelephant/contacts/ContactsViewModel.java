@@ -24,6 +24,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 public class ContactsViewModel extends ViewModel {
 
     public final MediatorLiveData<List<Contact>> phones = new MediatorLiveData<>();
@@ -50,6 +52,7 @@ public class ContactsViewModel extends ViewModel {
     private String searchText = null;
     private int contactsPermission = PackageManager.PERMISSION_DENIED;
 
+    @Inject
     public ContactsViewModel(ContactsRepository contactsRepository, AccountManager accountManager) {
         mContactsRepository = contactsRepository;
         mAccountManager = accountManager;

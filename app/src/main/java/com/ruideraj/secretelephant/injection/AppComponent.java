@@ -1,6 +1,8 @@
 package com.ruideraj.secretelephant.injection;
 
+import com.ruideraj.secretelephant.contacts.ContactsViewModel;
 import com.ruideraj.secretelephant.main.MainViewModel;
+import com.ruideraj.secretelephant.match.MatchViewModel;
 
 import javax.inject.Singleton;
 
@@ -11,9 +13,9 @@ import dagger.Component;
 public interface AppComponent {
 
     MainViewModel getMainViewModel();
+    ContactsViewModel getContactsViewModel();
+    MatchViewModel getMatchViewModel();
 
-    ContactsComponent getContactsComponent();
-    MatchComponent getMatchComponent();
     SendComponent getSendComponent(ContextModule contextModule);
 
 }

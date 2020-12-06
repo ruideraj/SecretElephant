@@ -5,12 +5,9 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.ruideraj.secretelephant.contacts.ContactsRepository;
 import com.ruideraj.secretelephant.contacts.ContactsViewModel;
 import com.ruideraj.secretelephant.injection.AppComponent;
-import com.ruideraj.secretelephant.injection.ContactsComponent;
 import com.ruideraj.secretelephant.injection.ContextModule;
-import com.ruideraj.secretelephant.injection.MatchComponent;
 import com.ruideraj.secretelephant.injection.SendComponent;
 import com.ruideraj.secretelephant.main.MainViewModel;
 import com.ruideraj.secretelephant.match.MatchViewModel;
@@ -35,19 +32,12 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
             return (T) appComponent.getMainViewModel();
         }
         else if(modelClass.isAssignableFrom(ContactsViewModel.class)) {
-            ContactsComponent contactsComponent = appComponent.getContactsComponent();
-            ContactsRepository contactsRepository = contactsComponent.contactsRepository();
-            AccountManager accountManager = contactsComponent.accountManager();
-
             //noinspection unchecked
-            return (T) new ContactsViewModel(contactsRepository, accountManager);
+            return (T) appComponent.getContactsViewModel();
         }
         else if(modelClass.isAssignableFrom(MatchViewModel.class)) {
-            MatchComponent matchComponent = appComponent.getMatchComponent();
-            Runner runner = matchComponent.runner();
-
             //noinspection unchecked
-            return (T) new MatchViewModel(runner);
+            return (T) appComponent.getMatchViewModel();
         }
         else if (modelClass.isAssignableFrom(SendViewModel.class)) {
             SendComponent sendComponent = appComponent.getSendComponent(new ContextModule(mContext));

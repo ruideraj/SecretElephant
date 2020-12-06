@@ -4,6 +4,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.content.Intent;
 
+import com.ruideraj.secretelephant.AccountManager;
 import com.ruideraj.secretelephant.Constants;
 import com.ruideraj.secretelephant.R;
 import com.ruideraj.secretelephant.Runner;
@@ -12,6 +13,8 @@ import com.ruideraj.secretelephant.contacts.Contact;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
 public class MatchViewModel extends ViewModel {
 
     public MutableLiveData<Integer> textId = new MutableLiveData<>();
@@ -19,10 +22,13 @@ public class MatchViewModel extends ViewModel {
 
     public SingleLiveEvent<Void> noContacts = new SingleLiveEvent<>();
 
-    private Runner mRunner;
+    public Runner mRunner;
+    public AccountManager mAccountManager;
 
-    public MatchViewModel(Runner runner) {
+    @Inject
+    public MatchViewModel(Runner runner, AccountManager accountManager) {
         mRunner = runner;
+        mAccountManager = accountManager;
     }
 
     public void processIntent(Intent intent) {
