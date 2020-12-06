@@ -1,12 +1,13 @@
 package com.ruideraj.secretelephant;
 
 import android.app.Application;
+import android.support.multidex.MultiDexApplication;
 
 import com.ruideraj.secretelephant.injection.AppComponent;
 import com.ruideraj.secretelephant.injection.AppModule;
 import com.ruideraj.secretelephant.injection.DaggerAppComponent;
 
-public class SeApplication extends Application {
+public class SeApplication extends MultiDexApplication {
 
     private AppComponent mAppComponent;
 
