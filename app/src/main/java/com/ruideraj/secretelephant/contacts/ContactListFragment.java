@@ -13,7 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.ruideraj.secretelephant.ADB;
+import com.ruideraj.secretelephant.AppLog;
 import com.ruideraj.secretelephant.R;
 
 import java.util.List;
@@ -41,7 +41,7 @@ public class ContactListFragment extends Fragment implements
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        ADB.d("ContactListFragment", "onCreateView");
+        AppLog.d("ContactListFragment", "onCreateView");
         mViewModel = ViewModelProviders.of(getActivity()).get(ContactsViewModel.class);
 
         Bundle args = getArguments();

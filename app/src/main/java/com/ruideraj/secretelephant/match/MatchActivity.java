@@ -1,24 +1,25 @@
 package com.ruideraj.secretelephant.match;
 
 import android.Manifest;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ruideraj.secretelephant.Constants;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.ruideraj.secretelephant.ConstantsKt;
 import com.ruideraj.secretelephant.R;
 import com.ruideraj.secretelephant.ViewModelFactory;
 import com.ruideraj.secretelephant.send.SendActivity;
@@ -126,7 +127,7 @@ public class MatchActivity extends AppCompatActivity {
 
     private void sendInvites(MatchExchange exchange) {
         Intent intent = new Intent(this, SendActivity.class);
-        intent.putExtra(Constants.KEY_EXCHANGE, exchange);
+        intent.putExtra(ConstantsKt.KEY_EXCHANGE, exchange);
         startActivity(intent);
     }
 }

@@ -14,7 +14,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.tasks.Task;
-import com.ruideraj.secretelephant.ADB;
+import com.ruideraj.secretelephant.AppLog;
 import com.ruideraj.secretelephant.AccountManager;
 import com.ruideraj.secretelephant.R;
 import com.ruideraj.secretelephant.SingleLiveEvent;
@@ -73,7 +73,7 @@ public class ContactsViewModel extends ViewModel {
 
         if(contactsPermission == PackageManager.PERMISSION_GRANTED) {
             if(phones.getValue() == null && emails.getValue() == null) {
-                ADB.d("ContactsViewModel", "Start - Load Contacts");
+                AppLog.d("ContactsViewModel", "Start - Load Contacts");
                 loadContacts();
             }
         }

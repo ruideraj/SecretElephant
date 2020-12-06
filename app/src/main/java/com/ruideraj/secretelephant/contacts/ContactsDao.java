@@ -5,7 +5,7 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.provider.ContactsContract;
 
-import com.ruideraj.secretelephant.ADB;
+import com.ruideraj.secretelephant.AppLog;
 
 import java.util.ArrayList;
 
@@ -49,7 +49,7 @@ public class ContactsDao {
         @Override
         protected ContactsResult doInBackground(Application... applications) {
             Application application = applications[0];
-            ADB.d("ContactsDao", "LoadContactsTask doInBackground");
+            AppLog.d("ContactsDao", "LoadContactsTask doInBackground");
             ArrayList<Contact> phonesList = new ArrayList<>();
             ArrayList<Contact> emailList = new ArrayList<>();
 

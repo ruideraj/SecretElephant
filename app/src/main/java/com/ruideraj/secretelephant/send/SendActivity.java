@@ -1,17 +1,18 @@
 package com.ruideraj.secretelephant.send;
 
-import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ruideraj.secretelephant.Constants;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.ruideraj.secretelephant.ConstantsKt;
 import com.ruideraj.secretelephant.R;
 import com.ruideraj.secretelephant.ViewModelFactory;
 import com.ruideraj.secretelephant.main.MainActivity;
@@ -77,7 +78,7 @@ public class SendActivity extends AppCompatActivity implements SendAdapter.SendC
         if(savedInstanceState == null) {
             // If we are not recreating the Activity, get invite data and start the service.
             Intent intent = getIntent();
-            MatchExchange exchange = intent.getParcelableExtra(Constants.KEY_EXCHANGE);
+            MatchExchange exchange = intent.getParcelableExtra(ConstantsKt.KEY_EXCHANGE);
 
             mViewModel.sendInvites(exchange);
         }

@@ -1,16 +1,17 @@
 package com.ruideraj.secretelephant.main;
 
-import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.ruideraj.secretelephant.Constants;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
+
+import com.ruideraj.secretelephant.ConstantsKt;
 import com.ruideraj.secretelephant.R;
 import com.ruideraj.secretelephant.ViewModelFactory;
 import com.ruideraj.secretelephant.contacts.ContactsActivity;
@@ -71,10 +72,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Intent intent = new Intent(this, ContactsActivity.class);
         switch(v.getId()) {
             case R.id.main_button_elephant:
-                intent.putExtra(Constants.KEY_MODE, Constants.MODE_ELEPHANT);
+                intent.putExtra(ConstantsKt.KEY_MODE, ConstantsKt.MODE_ELEPHANT);
                 break;
             case R.id.main_button_santa:
-                intent.putExtra(Constants.KEY_MODE, Constants.MODE_SANTA);
+                intent.putExtra(ConstantsKt.KEY_MODE, ConstantsKt.MODE_SANTA);
                 break;
         }
 

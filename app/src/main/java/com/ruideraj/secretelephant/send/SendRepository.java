@@ -1,12 +1,13 @@
 package com.ruideraj.secretelephant.send;
 
-import androidx.lifecycle.MutableLiveData;
 import android.content.Context;
+
+import androidx.lifecycle.MutableLiveData;
 
 import com.google.api.client.util.Base64;
 import com.google.api.services.gmail.model.Message;
 import com.ruideraj.secretelephant.BuildConfig;
-import com.ruideraj.secretelephant.Constants;
+import com.ruideraj.secretelephant.ConstantsKt;
 import com.ruideraj.secretelephant.PropertiesReader;
 import com.ruideraj.secretelephant.R;
 import com.ruideraj.secretelephant.Runner;
@@ -109,13 +110,13 @@ public class SendRepository {
 
             StringBuilder sb = new StringBuilder();
             sb.append(contact.getName()).append(", ");
-            if(mode == Constants.MODE_SANTA) {
+            if(mode == ConstantsKt.MODE_SANTA) {
                 sb.append(mContext.getString(R.string.send_santa));
                 Contact recipient = contacts.get(matches[i]);
                 sb.append(' ').append(recipient.getName());
 
             }
-            else if(mode == Constants.MODE_ELEPHANT) {
+            else if(mode == ConstantsKt.MODE_ELEPHANT) {
                 sb.append(mContext.getString(R.string.send_elephant));
                 sb.append(' ').append(matches[i] + 1); // + 1 for 0-based index.
             }

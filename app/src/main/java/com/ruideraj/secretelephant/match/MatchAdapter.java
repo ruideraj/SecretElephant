@@ -1,13 +1,14 @@
 package com.ruideraj.secretelephant.match;
 
 import android.graphics.Typeface;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.ruideraj.secretelephant.Constants;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.ruideraj.secretelephant.ConstantsKt;
 import com.ruideraj.secretelephant.R;
 import com.ruideraj.secretelephant.contacts.Contact;
 
@@ -37,11 +38,11 @@ public class MatchAdapter extends RecyclerView.Adapter {
         boolean showMatch = mMatchesShown[position];
 
         if(showMatch) {
-            if(mMode == Constants.MODE_SANTA) {
+            if(mMode == ConstantsKt.MODE_SANTA) {
                 Contact recipient = mContacts.get(mMatches[position]);
                 vh.recipient.setText(recipient.getName());
             }
-            else if(mMode == Constants.MODE_ELEPHANT) {
+            else if(mMode == ConstantsKt.MODE_ELEPHANT) {
                 int orderPosition = mMatches[position] + 1; // Add 1 to account for 0-based index.
                 vh.recipient.setText("" + orderPosition);
             }

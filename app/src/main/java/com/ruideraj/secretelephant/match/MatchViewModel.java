@@ -1,11 +1,12 @@
 package com.ruideraj.secretelephant.match;
 
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 import android.content.Intent;
 
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+
 import com.ruideraj.secretelephant.AccountManager;
-import com.ruideraj.secretelephant.Constants;
+import com.ruideraj.secretelephant.ConstantsKt;
 import com.ruideraj.secretelephant.R;
 import com.ruideraj.secretelephant.Runner;
 import com.ruideraj.secretelephant.SingleLiveEvent;
@@ -32,22 +33,22 @@ public class MatchViewModel extends ViewModel {
     }
 
     public void processIntent(Intent intent) {
-        ArrayList<Contact> contacts = intent.getParcelableArrayListExtra(Constants.KEY_SELECTED);
+        ArrayList<Contact> contacts = intent.getParcelableArrayListExtra(ConstantsKt.KEY_SELECTED);
         if(contacts == null) {
             noContacts.call();
             return;
         }
-        int mode = intent.getIntExtra(Constants.KEY_MODE, Constants.MODE_ELEPHANT);
+        int mode = intent.getIntExtra(ConstantsKt.KEY_MODE, ConstantsKt.MODE_ELEPHANT);
 
         createMatches(contacts, mode);
     }
 
     public void createMatches(ArrayList<Contact> contacts, int mode) {
         if(contacts != null) {
-            if(mode == Constants.MODE_SANTA) {
+            if(mode == ConstantsKt.MODE_SANTA) {
                 textId.setValue(R.string.match_santa);
             }
-            else if(mode == Constants.MODE_ELEPHANT) {
+            else if(mode == ConstantsKt.MODE_ELEPHANT) {
                 textId.setValue(R.string.match_elephant);
             }
 
@@ -66,7 +67,7 @@ public class MatchViewModel extends ViewModel {
     }
 
     private int[] getOrder(int size, int mode) {
-        boolean checkOrder = mode == Constants.MODE_SANTA;
+        boolean checkOrder = mode == ConstantsKt.MODE_SANTA;
         return MatchMaker.match(size, checkOrder);
     }
 

@@ -28,7 +28,7 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.Task;
-import com.ruideraj.secretelephant.Constants;
+import com.ruideraj.secretelephant.ConstantsKt;
 import com.ruideraj.secretelephant.R;
 import com.ruideraj.secretelephant.ViewModelFactory;
 import com.ruideraj.secretelephant.match.MatchActivity;
@@ -151,12 +151,12 @@ public class ContactsActivity extends AppCompatActivity implements TextWatcher {
         switch(item.getItemId()) {
             case R.id.action_continue:
                 Intent intent = new Intent(this, MatchActivity.class);
-                int mode = getIntent().getIntExtra(Constants.KEY_MODE, Constants.MODE_ELEPHANT);
+                int mode = getIntent().getIntExtra(ConstantsKt.KEY_MODE, ConstantsKt.MODE_ELEPHANT);
                 List<Contact> selectedContacts = mContactsViewModel.selectedContacts;
                 ArrayList<Contact> contactList = new ArrayList<>(selectedContacts);
 
-                intent.putExtra(Constants.KEY_MODE, mode);
-                intent.putExtra(Constants.KEY_SELECTED, contactList);
+                intent.putExtra(ConstantsKt.KEY_MODE, mode);
+                intent.putExtra(ConstantsKt.KEY_SELECTED, contactList);
                 startActivity(intent);
                 return true;
         }
