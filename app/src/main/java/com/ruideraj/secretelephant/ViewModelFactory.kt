@@ -23,13 +23,11 @@ class ViewModelFactory constructor(private val context: Context): ViewModelProvi
         } else if (modelClass.isAssignableFrom(MatchViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return appComponent.matchViewModel as T
-        } else if (modelClass.isAssignableFrom(SendViewModel::class.java)) {  // TODO
+        } else if (modelClass.isAssignableFrom(SendViewModel::class.java)) {
             val sendComponent = appComponent.getSendComponent(ContextModule(context))
-            val sendRepository = sendComponent.sendRepository()
-            val accountManager = sendComponent.accountManager()
 
             @Suppress("UNCHECKED_CAST")
-            return SendViewModel(sendRepository, accountManager) as T
+            return sendComponent.sendViewModel() as T
         }
 
         throw IllegalArgumentException("Unknown ViewModel Class: " + modelClass.name)

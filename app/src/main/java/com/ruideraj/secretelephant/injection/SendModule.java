@@ -16,13 +16,6 @@ import dagger.Provides;
 public class SendModule {
 
     @Provides
-    static SendRepository providesSendRepository(Context context, Runner runner,
-                                                 SmsSender smsSender, EmailSender emailSender,
-                                                 PropertiesReader propertiesReader) {
-        return new SendRepository(context, runner, smsSender, emailSender, propertiesReader);
-    }
-
-    @Provides
     static SmsSender providesSmsSender() {
         return new SmsSender(SmsManager.getDefault());
     }
@@ -36,4 +29,5 @@ public class SendModule {
     static PropertiesReader providesPropertiesReader(Context context) {
         return new PropertiesReader(context);
     }
+
 }

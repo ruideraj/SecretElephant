@@ -1,10 +1,10 @@
 package com.ruideraj.secretelephant.send;
 
+import android.view.View;
+
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
-import androidx.annotation.Nullable;
-import android.view.View;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.ruideraj.secretelephant.AccountManager;
@@ -13,6 +13,8 @@ import com.ruideraj.secretelephant.SingleLiveEvent;
 import com.ruideraj.secretelephant.match.MatchExchange;
 
 import java.util.List;
+
+import javax.inject.Inject;
 
 public class SendViewModel extends ViewModel implements SendAdapter.SendClickListener {
 
@@ -32,6 +34,7 @@ public class SendViewModel extends ViewModel implements SendAdapter.SendClickLis
     private int mTotalInvites;
     private int mInvitesSent;
 
+    @Inject
     public SendViewModel(SendRepository repository, AccountManager accountManager) {
         mRepository = repository;
         invitesData = mRepository.getInvites();

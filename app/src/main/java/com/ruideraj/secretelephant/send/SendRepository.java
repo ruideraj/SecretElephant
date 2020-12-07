@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 
+import javax.inject.Inject;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
@@ -41,6 +42,7 @@ public class SendRepository {
     private final MutableLiveData<List<SendInvite>> invites = new MutableLiveData<>();
     private final SingleLiveEvent<int[]> lastUpdatedPosition = new SingleLiveEvent<>();
 
+    @Inject
     public SendRepository(Context context, Runner runner,
                           SmsSender smsSender, EmailSender emailSender, PropertiesReader propertiesReader) {
         mContext = context;
