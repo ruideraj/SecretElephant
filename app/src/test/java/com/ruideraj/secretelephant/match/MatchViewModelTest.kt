@@ -2,6 +2,8 @@ package com.ruideraj.secretelephant.match
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import android.content.Intent
+import com.ruideraj.secretelephant.AccountManager
+import com.ruideraj.secretelephant.Runner
 import com.ruideraj.secretelephant.contacts.Contact
 import org.junit.Before
 import org.junit.Rule
@@ -17,15 +19,21 @@ class MatchViewModelTest {
     var instantExecutorRule = InstantTaskExecutorRule()
 
     @Mock
-    private var intent : Intent? = null
+    private lateinit var runner: Runner
 
-    private var viewModel : MatchViewModel? = null
+    @Mock
+    private lateinit var accountManager: AccountManager
+
+    @Mock
+    private lateinit var intent: Intent
+
+    private var viewModel: MatchViewModel? = null
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
-        viewModel = MatchViewModel()
+        viewModel = MatchViewModel(runner, accountManager)
     }
 
     @Test

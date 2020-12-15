@@ -16,15 +16,15 @@ class ViewModelFactory constructor(private val context: Context): ViewModelProvi
 
         if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return appComponent.mainViewModel as T
+            return appComponent.mainViewModel() as T
         } else if (modelClass.isAssignableFrom(ContactsViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return appComponent.contactsViewModel as T
+            return appComponent.contactsViewModel() as T
         } else if (modelClass.isAssignableFrom(MatchViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return appComponent.matchViewModel as T
+            return appComponent.matchViewModel() as T
         } else if (modelClass.isAssignableFrom(SendViewModel::class.java)) {
-            val sendComponent = appComponent.getSendComponent(ContextModule(context))
+            val sendComponent = appComponent.sendComponent(ContextModule(context))
 
             @Suppress("UNCHECKED_CAST")
             return sendComponent.sendViewModel() as T
