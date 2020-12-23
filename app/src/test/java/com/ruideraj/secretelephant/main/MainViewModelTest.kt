@@ -3,6 +3,7 @@ package com.ruideraj.secretelephant.main
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.whenever
 import com.ruideraj.secretelephant.AccountManager
 import com.ruideraj.secretelephant.R
 import org.hamcrest.CoreMatchers.equalTo
@@ -11,13 +12,13 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito.*
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 class MainViewModelTest {
 
     @get:Rule
-    var instantExecutorRule = InstantTaskExecutorRule()
+    val instantExecutorRule = InstantTaskExecutorRule()
 
     @Mock
     private lateinit var accountManager: AccountManager
@@ -36,7 +37,7 @@ class MainViewModelTest {
 
     @Test
     fun mainViewModel_start_signedInWhenAccountPresent() {
-        `when`(accountManager.getAccount()).thenReturn(account)
+        whenever(accountManager.getAccount()).thenReturn(account)
 
         viewModel.start()
 

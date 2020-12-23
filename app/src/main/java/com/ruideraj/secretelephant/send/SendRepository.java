@@ -182,7 +182,7 @@ public class SendRepository {
             }
 
             Exception exception = null;
-            if(mInvite.getContact().getType() == Contact.TYPE_PHONE) {
+            if(mInvite.getContact().getType() == Contact.Type.PHONE) {
                 String destination = null;
                 if(BuildConfig.DEBUG) {
                     destination = mPropertiesReader.getProperty(
@@ -199,7 +199,7 @@ public class SendRepository {
                     exception = e;
                 }
             }
-            else if(mInvite.getContact().getType() == Contact.TYPE_EMAIL) {
+            else if(mInvite.getContact().getType() == Contact.Type.EMAIL) {
                 if(mEmailSender.isEmailAccountPresent()) {
                     // Build email object.
                     Properties props = new Properties();

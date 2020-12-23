@@ -1,7 +1,7 @@
 package com.ruideraj.secretelephant.match
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import android.content.Intent
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.ruideraj.secretelephant.AccountManager
 import com.ruideraj.secretelephant.Runner
 import com.ruideraj.secretelephant.contacts.Contact
@@ -38,9 +38,9 @@ class MatchViewModelTest {
 
     @Test
     fun processIntentWithContacts() {
-        val list = arrayListOf(Contact("Person1", Contact.TYPE_PHONE, "123-456-7890"),
-                Contact("Person2", Contact.TYPE_PHONE, "456-123-0987"),
-                Contact("Person3", Contact.TYPE_PHONE, "987-123-4560"))
+        val list = arrayListOf(Contact("Person1", Contact.Type.PHONE, "123-456-7890"),
+                Contact("Person2", Contact.Type.PHONE, "456-123-0987"),
+                Contact("Person3", Contact.Type.PHONE, "987-123-4560"))
         `when`(intent!!.getParcelableArrayListExtra<Contact>(any())).thenReturn(list)
 
         viewModel!!.processIntent(intent)

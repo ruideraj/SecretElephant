@@ -37,8 +37,8 @@ public class SendAdapter extends RecyclerView.Adapter {
         ViewHolder vh = (ViewHolder) holder;
         SendInvite invite = mInvites.get(position);
 
-        int type = invite.getContact().getType();
-        if(type == Contact.TYPE_PHONE) {
+        Contact.Type type = invite.getContact().getType();
+        if (type == Contact.Type.PHONE) {
             vh.icon.setImageResource(R.drawable.ic_chat_black_24dp);
         }
         else {

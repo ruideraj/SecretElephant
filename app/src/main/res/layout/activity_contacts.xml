@@ -18,24 +18,27 @@
         app:layout_constraintTop_toTopOf="parent"
         android:visibility="gone"/>
 
-    <androidx.viewpager.widget.ViewPager
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/contacts_tabs"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/contacts_selected_recycler"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone" />
+
+    <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/contacts_viewpager"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/contacts_tabs"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/contacts_selected_recycler">
-
-        <com.google.android.material.tabs.TabLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-    </androidx.viewpager.widget.ViewPager>
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone" />
 
     <include
         android:id="@+id/contacts_progress_bar"

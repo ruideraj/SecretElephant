@@ -6,7 +6,8 @@ import com.ruideraj.secretelephant.match.MatchViewModel
 import dagger.Component
 import javax.inject.Singleton
 
-@Component(modules = [AppModule::class, AccountModule::class, RunnerModule::class])
+@Component(modules = [AppModule::class, AccountModule::class, ContactsModule::class,
+    RunnerModule::class])
 @Singleton
 interface AppComponent {
 
