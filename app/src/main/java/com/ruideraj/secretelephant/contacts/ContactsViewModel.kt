@@ -1,5 +1,6 @@
 package com.ruideraj.secretelephant.contacts
 
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.view.View
 import androidx.lifecycle.*
@@ -76,7 +77,8 @@ class ContactsViewModel @Inject constructor(private val contactsRepository: Cont
 
     private var contactsPermission = PackageManager.PERMISSION_DENIED
 
-    val signInIntent = accountManager.getSignInIntent()
+    val signInIntent: Intent
+        get() = accountManager.getSignInIntent()
 
     val pageCount = Contact.Type.values().size
 

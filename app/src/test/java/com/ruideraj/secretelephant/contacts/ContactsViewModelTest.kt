@@ -10,13 +10,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.tasks.Task
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import com.ruideraj.secretelephant.AccountManager
 import com.ruideraj.secretelephant.R
 import io.mockk.*
+import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -28,8 +26,6 @@ import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 
 class ContactsViewModelTest {
 
@@ -41,13 +37,13 @@ class ContactsViewModelTest {
 
     private var contactsRepository = mockk<ContactsRepository>()
 
-    @Mock
+    @RelaxedMockK
     private lateinit var accountManager: AccountManager
 
-    @Mock
+    @MockK
     private lateinit var signInTask: Task<GoogleSignInAccount>
 
-    @Mock
+    @MockK
     private lateinit var account: GoogleSignInAccount
 
     private lateinit var viewModel: ContactsViewModel
@@ -55,8 +51,8 @@ class ContactsViewModelTest {
     @Before
     @ExperimentalCoroutinesApi
     fun setup() {
+        MockKAnnotations.init(this)
         Dispatchers.setMain(testCoroutineDispatcher)
-        MockitoAnnotations.initMocks(this)
 
         mockkStatic(Log::class)
         every { Log.d(any(), any()) } returns 0
@@ -91,22 +87,24 @@ class ContactsViewModelTest {
 
     @Test
     fun contactsViewModel_start_permissionNotGranted_permissionRequested() {
-        val mockObserver: Observer<Void> = mock()
+        val mockObserver: Observer<Void> = mockk(relaxed = true)
+
         viewModel.requestPermission.observeForever(mockObserver)
 
         val permission = PackageManager.PERMISSION_DENIED
         viewModel.start(permission)
 
-        verify(mockObserver).onChanged(null)
+        verify { mockObserver.onChanged(any()) }
 
         viewModel.requestPermission.removeObserver(mockObserver)
     }
 
     @Test
     fun contactsViewModel_signInResult_success_emailSet() {
-        whenever(signInTask.getResult(any<Class<Throwable>>())).thenReturn(account)
+        every { signInTask.getResult(any<Class<Throwable>>()) } returns account
+
         val email = "fake@email.com"
-        whenever(account.email).thenReturn(email)
+        every { account.email } returns email
 
         viewModel.signInResult(signInTask)
         assertThat(viewModel.emailAccount.value, equalTo(email))
@@ -115,7 +113,7 @@ class ContactsViewModelTest {
     @Test
     fun contactsViewModel_signInResult_error_toastShown() {
         val errorStatus = Status(GoogleSignInStatusCodes.SIGN_IN_FAILED)
-        whenever(signInTask.getResult(any<Class<Throwable>>())).thenThrow(ApiException(errorStatus))
+        every { signInTask.getResult(any<Class<Throwable>>()) } throws ApiException(errorStatus)
 
         viewModel.signInResult(signInTask)
         assertThat(viewModel.emailAccount.value, equalTo(null))

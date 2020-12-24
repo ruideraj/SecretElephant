@@ -5,33 +5,32 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.ruideraj.secretelephant.AccountManager
 import com.ruideraj.secretelephant.Runner
 import com.ruideraj.secretelephant.contacts.Contact
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
 
 class MatchViewModelTest {
 
     @Rule @JvmField
     var instantExecutorRule = InstantTaskExecutorRule()
 
-    @Mock
+    @MockK
     private lateinit var runner: Runner
 
-    @Mock
+    @MockK
     private lateinit var accountManager: AccountManager
 
-    @Mock
+    @MockK
     private lateinit var intent: Intent
 
     private var viewModel: MatchViewModel? = null
 
     @Before
     fun setup() {
-        MockitoAnnotations.initMocks(this)
+        MockKAnnotations.init(this)
 
         viewModel = MatchViewModel(runner, accountManager)
     }
@@ -41,7 +40,7 @@ class MatchViewModelTest {
         val list = arrayListOf(Contact("Person1", Contact.Type.PHONE, "123-456-7890"),
                 Contact("Person2", Contact.Type.PHONE, "456-123-0987"),
                 Contact("Person3", Contact.Type.PHONE, "987-123-4560"))
-        `when`(intent!!.getParcelableArrayListExtra<Contact>(any())).thenReturn(list)
+        every { intent.getParcelableArrayListExtra<Contact>(any()) } returns list
 
         viewModel!!.processIntent(intent)
     }

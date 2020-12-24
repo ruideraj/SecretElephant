@@ -2,42 +2,34 @@ package com.ruideraj.secretelephant.main
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.whenever
 import com.ruideraj.secretelephant.AccountManager
 import com.ruideraj.secretelephant.R
+import io.mockk.*
 import org.hamcrest.CoreMatchers.equalTo
 import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mock
-import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 
 class MainViewModelTest {
 
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
 
-    @Mock
-    private lateinit var accountManager: AccountManager
+    private var accountManager: AccountManager = mockk()
 
-    @Mock
-    private lateinit var account: GoogleSignInAccount
+    private var account: GoogleSignInAccount = mockk()
 
     private lateinit var viewModel: MainViewModel
 
     @Before
     fun setup() {
-        MockitoAnnotations.initMocks(this)
-
         viewModel = MainViewModel(accountManager)
     }
 
     @Test
     fun mainViewModel_start_signedInWhenAccountPresent() {
-        whenever(accountManager.getAccount()).thenReturn(account)
+        every { accountManager.getAccount() } returns account
 
         viewModel.start()
 
@@ -46,21 +38,22 @@ class MainViewModelTest {
 
     @Test
     fun mainViewModel_start_signedOutWhenAccountNotPresent() {
+        every { accountManager.getAccount() } returns null
+
         viewModel.start()
         assertThat(viewModel.signedIn.value, equalTo(false))
     }
 
     @Test
     fun mainViewModel_signOut_signOutSucceeds_signedOutWithMessage() {
-        val listenerCaptor = argumentCaptor<AccountManager.AccountListener>()
+        val listenerSlot = slot<AccountManager.AccountListener>()
+        every { accountManager.signOut(capture(listenerSlot)) } just Runs
 
         viewModel.signOut()
 
-        verify(accountManager).signOut(listenerCaptor.capture())
+        verify { accountManager.signOut(any()) }
 
-        listenerCaptor.firstValue.apply {
-            onSignOutSuccess()
-        }
+        listenerSlot.captured.onSignOutSuccess()
 
         assertThat(viewModel.signedIn.value, equalTo(false))
         assertThat(viewModel.signOutMessage.value, equalTo(R.string.main_menu_signed_out))
@@ -68,15 +61,14 @@ class MainViewModelTest {
     
     @Test
     fun mainViewModel_signOut_signOutFails_showsSignOutFailMessage() {
-        val listenerCaptor = argumentCaptor<AccountManager.AccountListener>()
+        val listenerSlot = slot<AccountManager.AccountListener>()
+        every { accountManager.signOut(capture(listenerSlot)) } just Runs
 
         viewModel.signOut()
 
-        verify(accountManager).signOut(listenerCaptor.capture())
+        verify { accountManager.signOut(any()) }
 
-        listenerCaptor.firstValue.apply {
-            onSignOutFailure()
-        }
+        listenerSlot.captured.onSignOutFailure()
 
         assertThat(viewModel.signOutMessage.value, equalTo(R.string.main_menu_sign_out_failed))
     }
