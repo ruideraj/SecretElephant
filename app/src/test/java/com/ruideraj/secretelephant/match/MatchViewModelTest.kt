@@ -18,7 +18,7 @@ class MatchViewModelTest {
     var instantExecutorRule = InstantTaskExecutorRule()
 
     @MockK
-    private lateinit var runner: Runner
+    private lateinit var matchmaker: Matchmaker
 
     @MockK
     private lateinit var accountManager: AccountManager
@@ -32,7 +32,7 @@ class MatchViewModelTest {
     fun setup() {
         MockKAnnotations.init(this)
 
-        viewModel = MatchViewModel(runner, accountManager)
+        viewModel = MatchViewModel(matchmaker, accountManager)
     }
 
     @Test
@@ -42,7 +42,7 @@ class MatchViewModelTest {
                 Contact("Person3", Contact.Type.PHONE, "987-123-4560"))
         every { intent.getParcelableArrayListExtra<Contact>(any()) } returns list
 
-        viewModel!!.processIntent(intent)
+        viewModel!!.setupExchange(intent)
     }
 
 }

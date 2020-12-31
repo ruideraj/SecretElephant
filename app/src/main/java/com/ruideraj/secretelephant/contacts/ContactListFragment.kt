@@ -28,7 +28,7 @@ class ContactListFragment : Fragment() {
     }
 
     private val viewModel by activityViewModels<ContactsViewModel> {
-        ViewModelFactory(requireContext())
+        ViewModelFactory(requireActivity())
     }
     private lateinit var type: Contact.Type
     private lateinit var recycler: RecyclerView

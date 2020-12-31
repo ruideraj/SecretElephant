@@ -13,7 +13,7 @@ interface AppComponent {
 
     fun mainViewModel(): MainViewModel
     fun contactsViewModel(): ContactsViewModel
-    fun matchViewModel(): MatchViewModel
 
-    fun sendComponent(contextModule: ContextModule): SendComponent
+    fun sendComponent(activityModule: ActivityModule): SendComponent
+    fun matchComponent(activityModule: ActivityModule): MatchComponent
 }
