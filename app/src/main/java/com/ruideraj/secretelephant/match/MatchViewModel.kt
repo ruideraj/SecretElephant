@@ -28,9 +28,9 @@ class MatchViewModel @Inject constructor(private val matchmaker: Matchmaker,
         get() = noContactsData
     private val noContactsData = SingleLiveEvent<Void>()
 
-    val sendInvites: LiveData<MatchExchange>
-        get() = sendInvitesData
-    private val sendInvitesData = SingleLiveEvent<MatchExchange>()
+    val sendMessages: LiveData<MatchExchange>
+        get() = sendMessagesData
+    private val sendMessagesData = SingleLiveEvent<MatchExchange>()
 
     val toast: LiveData<Int>
         get() = toastData
@@ -43,12 +43,12 @@ class MatchViewModel @Inject constructor(private val matchmaker: Matchmaker,
             return
         }
 
-        val mode = intent.getIntExtra(KEY_MODE, MODE_ELEPHANT)
+        val mode = intent.getSerializableExtra(KEY_MODE) as Mode
 
         viewModelScope.launch {
             exchangeData.value = createExchange(contacts, mode)
 
-            val text = if (mode == MODE_ELEPHANT) {
+            val text = if (mode == Mode.ELEPHANT) {
                 R.string.match_elephant
             } else {
                 R.string.match_santa
@@ -74,7 +74,7 @@ class MatchViewModel @Inject constructor(private val matchmaker: Matchmaker,
                 permissionManager.requestPermissions(arrayOf(Manifest.permission.SEND_SMS),
                         REQUEST_SMS)
             } else {
-                sendInvitesData.value = exchange
+                sendMessagesData.value = exchange
             }
         }
     }
@@ -84,13 +84,13 @@ class MatchViewModel @Inject constructor(private val matchmaker: Matchmaker,
             if (results.isEmpty() || results[0] != PackageManager.PERMISSION_GRANTED) {
                 toastData.value = R.string.match_permission_denied_sms
             } else {
-                sendInvitesData.value = exchangeData.value
+                sendMessagesData.value = exchangeData.value
             }
         }
     }
 
-    private suspend fun createExchange(contacts: List<Contact>, mode: Int): MatchExchange {
-        val matches = matchmaker.match(contacts.size, mode == MODE_SANTA)
+    private suspend fun createExchange(contacts: List<Contact>, mode: Mode): MatchExchange {
+        val matches = matchmaker.match(contacts.size, mode == Mode.SANTA)
         return MatchExchange(contacts, matches, mode)
     }
 }

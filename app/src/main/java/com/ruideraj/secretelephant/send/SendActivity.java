@@ -44,31 +44,31 @@ public class SendActivity extends AppCompatActivity implements SendAdapter.SendC
         mViewModel = ViewModelProviders.of(this,
                 new ViewModelFactory(this)).get(SendViewModel.class);
 
-        mViewModel.invitesData.observe(this, invites -> {
+        mViewModel.getInvitesData().observe(this, invites -> {
             if(invites != null) {
                 mAdapter.setData(invites);
             }
         });
 
-        mViewModel.updatedPosition.observe(this, position -> {
-            if(position != null) {
-                mAdapter.notifyItemChanged(position);
+        mViewModel.getUpdatedPosition().observe(this, update -> {
+            if(update != null) {
+                mAdapter.notifyItemChanged(update.getPosition());
             }
         });
 
-        mViewModel.queueFinished.observe(this, aVoid -> goBackToMain());
+        mViewModel.getQueueFinished().observe(this, aVoid -> goBackToMain());
 
-        mViewModel.toast.observe(this, stringId -> {
+        mViewModel.getToast().observe(this, stringId -> {
             if(stringId != null) Toast.makeText(this, stringId, Toast.LENGTH_SHORT).show();
         });
 
-        mViewModel.listVisibility.observe(this, visibility -> {
+        mViewModel.getListVisibility().observe(this, visibility -> {
             if(visibility != null) {
                 mRecycler.setVisibility(visibility);
             }
         });
 
-        mViewModel.progressVisibility.observe(this, visibility -> {
+        mViewModel.getProgressVisibility().observe(this, visibility -> {
             if(visibility != null) {
                 mText.setVisibility(visibility);
                 mProgress.setVisibility(visibility);
@@ -101,7 +101,7 @@ public class SendActivity extends AppCompatActivity implements SendAdapter.SendC
 
     @Override
     public void onRefreshClick(int position) {
-        mViewModel.onRefreshClick(position);
+        mViewModel.resendMessage(position);
     }
 
     private void goBackToMain() {

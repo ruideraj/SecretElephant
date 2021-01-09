@@ -8,6 +8,8 @@ const val KEY_EXCHANGE = "exchange"
 const val MODE_SANTA = 0
 const val MODE_ELEPHANT = 1
 
+enum class Mode { SANTA, ELEPHANT }
+
 const val PREFS_NAME = "settings"
 const val PREFS_EMAIL = "email"
 

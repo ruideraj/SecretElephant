@@ -1,7 +1,5 @@
 package com.ruideraj.secretelephant.send;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +8,9 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.ruideraj.secretelephant.R;
 import com.ruideraj.secretelephant.contacts.Contact;
 
@@ -17,7 +18,7 @@ import java.util.List;
 
 public class SendAdapter extends RecyclerView.Adapter {
 
-    private List<SendInvite> mInvites;
+    private List<Message> mMessages;
     private SendClickListener mListener;
 
     public SendAdapter(SendClickListener listener) {
@@ -35,9 +36,9 @@ public class SendAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ViewHolder vh = (ViewHolder) holder;
-        SendInvite invite = mInvites.get(position);
+        Message message = mMessages.get(position);
 
-        Contact.Type type = invite.getContact().getType();
+        Contact.Type type = message.getContact().getType();
         if (type == Contact.Type.PHONE) {
             vh.icon.setImageResource(R.drawable.ic_chat_black_24dp);
         }
@@ -45,25 +46,25 @@ public class SendAdapter extends RecyclerView.Adapter {
             vh.icon.setImageResource(R.drawable.ic_email_black_24dp);
         }
 
-        vh.name.setText(invite.getContact().getName());
+        vh.name.setText(message.getContact().getName());
 
-        int status = invite.getStatus();
+        Message.Status status = message.getStatus();
         switch(status) {
-            case SendInvite.SENT:
+            case SENT:
                 vh.progress.setVisibility(View.GONE);
                 vh.warning.setVisibility(View.GONE);
                 vh.refresh.setVisibility(View.GONE);
                 vh.check.setVisibility(View.VISIBLE);
                 vh.buttonLayout.setVisibility(View.VISIBLE);
                 break;
-            case SendInvite.ERROR:
+            case ERROR:
                 vh.progress.setVisibility(View.GONE);
                 vh.check.setVisibility(View.GONE);
                 vh.warning.setVisibility(View.VISIBLE);
                 vh.refresh.setVisibility(View.VISIBLE);
                 vh.buttonLayout.setVisibility(View.VISIBLE);
                 break;
-            case SendInvite.IN_PROGRESS:
+            case IN_PROGRESS:
                 vh.buttonLayout.setVisibility(View.GONE);
                 vh.progress.setVisibility(View.VISIBLE);
                 break;
@@ -72,11 +73,11 @@ public class SendAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemCount() {
-        return mInvites != null ? mInvites.size() : 0;
+        return mMessages != null ? mMessages.size() : 0;
     }
 
-    public void setData(List<SendInvite> invites) {
-        mInvites = invites;
+    public void setData(List<Message> messages) {
+        mMessages = messages;
         notifyDataSetChanged();
     }
 

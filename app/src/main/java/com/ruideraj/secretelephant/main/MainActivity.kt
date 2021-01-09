@@ -8,8 +8,10 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
-import com.ruideraj.secretelephant.*
+import com.ruideraj.secretelephant.KEY_MODE
+import com.ruideraj.secretelephant.Mode
+import com.ruideraj.secretelephant.R
+import com.ruideraj.secretelephant.ViewModelFactory
 import com.ruideraj.secretelephant.contacts.ContactsActivity
 
 class MainActivity : AppCompatActivity() {
@@ -24,14 +26,14 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.main_button_elephant).setOnClickListener {
             val intent = Intent(this, ContactsActivity::class.java).apply {
-                putExtra(KEY_MODE, MODE_ELEPHANT)
+                putExtra(KEY_MODE, Mode.ELEPHANT)
             }
             startActivity(intent)
         }
 
         findViewById<Button>(R.id.main_button_santa).setOnClickListener {
             val intent = Intent(this, ContactsActivity::class.java).apply {
-                putExtra(KEY_MODE, MODE_SANTA)
+                putExtra(KEY_MODE, Mode.SANTA)
             }
             startActivity(intent)
         }

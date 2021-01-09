@@ -158,7 +158,7 @@ class ContactsActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_continue -> {
-                val mode = intent.getIntExtra(KEY_MODE, MODE_ELEPHANT)
+                val mode = intent.getSerializableExtra(KEY_MODE) as Mode
                 val contactList = ArrayList(viewModel.selectedContacts)
 
                 val matchIntent = Intent(this, MatchActivity::class.java).apply {

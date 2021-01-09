@@ -3,10 +3,18 @@ package com.ruideraj.secretelephant
 import android.content.Context
 import java.io.IOException
 import java.util.*
+import javax.inject.Inject
 
-class PropertiesReader(private val context : Context) {
+interface PropertiesReader {
+    fun getProperty(stringId: Int): String
+    fun getProperty(key: String): String
+}
 
-    fun getProperty(key : String) : String {
+class PropertiesReaderImpl @Inject constructor(private val context : Context) : PropertiesReader {
+
+    override fun getProperty(stringId: Int) = getProperty(context.getString(stringId))
+
+    override fun getProperty(key : String) : String {
         val properties = Properties()
         val assetManager = context.assets
 

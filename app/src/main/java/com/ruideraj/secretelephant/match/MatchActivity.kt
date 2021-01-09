@@ -50,7 +50,7 @@ class MatchActivity : AppCompatActivity() {
             finish()
         })
 
-        viewModel.sendInvites.observe(this, { exchange ->
+        viewModel.sendMessages.observe(this, { exchange ->
             val intent = Intent(this, SendActivity::class.java).apply {
                 putExtra(KEY_EXCHANGE, exchange)
             }

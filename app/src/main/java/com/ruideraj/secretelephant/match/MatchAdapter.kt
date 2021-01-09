@@ -6,9 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.ruideraj.secretelephant.MODE_SANTA
+import com.ruideraj.secretelephant.Mode
 import com.ruideraj.secretelephant.R
-import com.ruideraj.secretelephant.contacts.Contact
 
 class MatchAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -30,7 +29,7 @@ class MatchAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         val showMatch = matchesShown!![position]
         if (showMatch) {
-            if (ex.mode == MODE_SANTA) {
+            if (ex.mode == Mode.SANTA) {
                 val recipient = ex.contacts[ex.matches[position]]
                 vh.recipient.text = recipient.name
             } else {

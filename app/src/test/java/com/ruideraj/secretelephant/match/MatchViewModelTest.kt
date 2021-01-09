@@ -3,6 +3,7 @@ package com.ruideraj.secretelephant.match
 import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.ruideraj.secretelephant.AccountManager
+import com.ruideraj.secretelephant.PermissionManager
 import com.ruideraj.secretelephant.Runner
 import com.ruideraj.secretelephant.contacts.Contact
 import io.mockk.MockKAnnotations
@@ -24,6 +25,9 @@ class MatchViewModelTest {
     private lateinit var accountManager: AccountManager
 
     @MockK
+    private lateinit var permissionsManager: PermissionManager
+
+    @MockK
     private lateinit var intent: Intent
 
     private var viewModel: MatchViewModel? = null
@@ -32,7 +36,7 @@ class MatchViewModelTest {
     fun setup() {
         MockKAnnotations.init(this)
 
-        viewModel = MatchViewModel(matchmaker, accountManager)
+        viewModel = MatchViewModel(matchmaker, permissionsManager)
     }
 
     @Test

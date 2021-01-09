@@ -1,13 +1,13 @@
 package com.ruideraj.secretelephant.match
 
 import android.os.Parcelable
+import com.ruideraj.secretelephant.Mode
 import com.ruideraj.secretelephant.contacts.Contact
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class MatchExchange(val contacts: List<Contact>, val matches: IntArray, val mode: Int)
+data class MatchExchange(val contacts: List<Contact>, val matches: IntArray, val mode: Mode)
     : Parcelable {
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -24,7 +24,9 @@ data class MatchExchange(val contacts: List<Contact>, val matches: IntArray, val
     override fun hashCode(): Int {
         var result = contacts.hashCode()
         result = 31 * result + matches.contentHashCode()
-        result = 31 * result + mode
+        result = 31 * result + mode.hashCode()
         return result
     }
+
+
 }
