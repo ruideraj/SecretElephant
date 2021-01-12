@@ -55,22 +55,12 @@
             android:visibility="gone"/>
 
         <ImageView
-            android:id="@+id/send_warning"
+            android:id="@+id/send_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="4dp"
             android:background="@null"
-            app:srcCompat="@drawable/ic_warning_24dp"
-            android:visibility="gone"/>
-
-        <ImageView
-            android:id="@+id/send_check"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="4dp"
-            android:tint="#00FF00"
-            app:srcCompat="@drawable/ic_check_24dp"
-            android:visibility="visible"/>
+            app:srcCompat="@drawable/ic_warning_24dp"/>
 
     </LinearLayout>
 

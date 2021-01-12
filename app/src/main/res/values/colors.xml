@@ -11,4 +11,7 @@
     // DetailedChipView.getBackgroundColor()
     <color name="theme_accent">#80e27e</color>
 
+    <color name="send_error">#AB000D</color>
+    <color name="send_success">#00FF00</color>
+
 </resources>

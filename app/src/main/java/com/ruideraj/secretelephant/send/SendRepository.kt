@@ -73,6 +73,7 @@ class SendRepositoryImpl @Inject constructor(private val context: Context,
         if (list != null && position < list.size) {
             val message = list[position]
             setMessageStatus(position, message, Message.Status.IN_PROGRESS, null)
+            withContext(Dispatchers.IO) { launch { sendMessage(position, message) } }
         }
     }
 
@@ -84,7 +85,7 @@ class SendRepositoryImpl @Inject constructor(private val context: Context,
             val message = if (mode == Mode.SANTA) {
                 "${contact.name}, you will be giving to ${contacts[matches[index]].name}!"
             } else {
-                "${contact.name}, you number is ${matches[index]}!"
+                "${contact.name}, you number is ${matches[index] + 1}!"
             }
 
             messages.add(Message(contact, message))

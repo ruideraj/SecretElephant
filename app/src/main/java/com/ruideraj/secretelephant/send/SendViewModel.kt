@@ -12,7 +12,7 @@ import javax.inject.Inject
 class SendViewModel @Inject constructor(private val repository: SendRepository,
                                         private val accountManager: AccountManager) : ViewModel() {
 
-    val invitesData: LiveData<List<Message>> = repository.messages
+    val messages: LiveData<List<Message>> = repository.messages
     val updatedPosition: LiveData<SendRepository.Update> = repository.lastUpdatedPosition
 
     val queueFinished: LiveData<Unit>
@@ -45,7 +45,7 @@ class SendViewModel @Inject constructor(private val repository: SendRepository,
         repository.lastUpdatedPosition.removeObserver(updateObserver)
     }
 
-    fun sendInvites(exchange: MatchExchange) {
+    fun sendMessages(exchange: MatchExchange) {
         repository.setEmailAccount(accountManager.getAccount()?.email)
 
         totalMessages = exchange.contacts.size

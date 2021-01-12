@@ -64,6 +64,7 @@ class MatchAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         init {
             recipient.setOnClickListener {
+                // TODO Visibility of matches should be handled by ViewModel
                 matchesShown?.let {
                     val position = adapterPosition
                     it[position] = !it[position]
