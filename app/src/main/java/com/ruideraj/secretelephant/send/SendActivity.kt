@@ -40,26 +40,26 @@ class SendActivity : AppCompatActivity() {
         text = findViewById(R.id.send_list_text)
         progress = findViewById(R.id.send_list_progress)
 
-        viewModel.run {
-            messages.observe(this@SendActivity, { messages ->
+        viewModel.let {
+            it.messages.observe(this, { messages ->
                 if (messages != null) sendAdapter.messages = messages
             })
 
-            updatedPosition.observe(this@SendActivity, { update ->
+            it.updatedPosition.observe(this, { update ->
                 if (update != null) sendAdapter.notifyItemChanged(update.position)
             })
 
-            queueFinished.observe(this@SendActivity, { goBackToMain() })
+            it.queueFinished.observe(this, { goBackToMain() })
 
-            toast.observe(this@SendActivity, { toastId ->
-                if (toastId != null) Toast.makeText(this@SendActivity, toastId, Toast.LENGTH_SHORT).show()
+            it.toast.observe(this, { toastId ->
+                if (toastId != null) Toast.makeText(this, toastId, Toast.LENGTH_SHORT).show()
             })
 
-            listVisibility.observe(this@SendActivity, { visibility ->
+            it.listVisibility.observe(this, { visibility ->
                 if (visibility != null) recycler.visibility = visibility
             })
 
-            progressVisibility.observe(this@SendActivity, { visibility ->
+            it.progressVisibility.observe(this, { visibility ->
                 if (visibility != null) {
                     text.visibility = visibility
                     progress.visibility = visibility

@@ -13,6 +13,7 @@ import com.ruideraj.secretelephant.AccountManager
 import com.ruideraj.secretelephant.R
 import com.ruideraj.secretelephant.SingleLiveEvent
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Inject
 
 class ContactsViewModel @Inject constructor(private val contactsRepository: ContactsRepository,
@@ -30,7 +31,7 @@ class ContactsViewModel @Inject constructor(private val contactsRepository: Cont
         get() = selectedContactsList
     private val selectedContactsList: MutableList<Contact> = mutableListOf()
 
-    private val selectedData: MutableSet<String> = HashSet()
+    private val selectedData: MutableSet<String> = mutableSetOf()
 
     val emailAccount: LiveData<String>
         get() = emailAccountData
@@ -56,9 +57,8 @@ class ContactsViewModel @Inject constructor(private val contactsRepository: Cont
         get() = selectAccountData
     private val selectAccountData = SingleLiveEvent<Void>()
 
-    val updatedContact: LiveData<Boolean>
-        get() = updatedContactData
-    private val updatedContactData = SingleLiveEvent<Boolean>()
+    private val contactUpdateFlow = MutableSharedFlow<ContactUpdate>()
+    val contactUpdate = contactUpdateFlow.asLiveData()
 
     val toast: LiveData<Int>
         get() = toastData
@@ -172,9 +172,9 @@ class ContactsViewModel @Inject constructor(private val contactsRepository: Cont
         val currentFilterText = filterText
         val contacts = contactsResult
 
-        val inputDiffersFromExisting = currentFilterText != input
+        val inputDiffersFromCurrent = currentFilterText != input
         val newInputEntered = currentFilterText.isEmpty() && input.isNotEmpty()
-        if (contacts != null && (inputDiffersFromExisting || newInputEntered)) {
+        if (contacts != null && (inputDiffersFromCurrent || newInputEntered)) {
             filterParentJob?.let { if (!it.isCompleted) it.cancel() }
 
             if (input.isNotEmpty()) input = input.toLowerCase()
@@ -219,17 +219,41 @@ class ContactsViewModel @Inject constructor(private val contactsRepository: Cont
                 true
             }
 
-            if (selectedContactsList.size == 1) {
-                showContinueData.value = true
-            } else if (selectedContactsList.size == 0) {
-                showContinueData.value = false
-            }
-
-            updatedContactData.value = added
+            checkShouldShowContinue()
 
             if (filterText.isNotEmpty()) filter("")
+
+            viewModelScope.launch {
+                contactUpdateFlow.emit(ContactUpdate(contact.type, added, selectedContactsList.size - 1, position))
+            }
         }
     }
 
+    fun removeSelectedContact(position: Int) {
+        val removedContact = selectedContactsList[position]
+        selectedContactsList.removeAt(position)
+        selectedData.remove(removedContact.data)
+
+        val listPosition = if (removedContact.type == Contact.Type.PHONE) {
+            phonesData.value?.let { it.indexOfFirst { contact -> contact.data == removedContact.data } }
+        } else {
+            emailsData.value?.let { it.indexOfFirst { contact -> contact.data == removedContact.data } }
+        }
+
+        viewModelScope.launch {
+            contactUpdateFlow.emit(ContactUpdate(removedContact.type, false, position, listPosition!!))
+        }
+
+        checkShouldShowContinue()
+    }
+
     fun onSelectAccount() = selectAccountData.call()
+
+    private fun checkShouldShowContinue() {
+        if (selectedContactsList.size == 1) {
+            showContinueData.value = true
+        } else if (selectedContactsList.size == 0) {
+            showContinueData.value = false
+        }
+    }
 }

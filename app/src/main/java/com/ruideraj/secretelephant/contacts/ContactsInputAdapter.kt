@@ -1,17 +1,17 @@
 package com.ruideraj.secretelephant.contacts
 
+import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.chip.Chip
 import com.ruideraj.secretelephant.R
 
 class ContactsInputAdapter(private val viewModel: ContactsViewModel,
-                           private val contacts: List<Contact>,
-                           private val textWatcher: TextWatcher)
+                           private val contacts: List<Contact>)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -25,7 +25,19 @@ class ContactsInputAdapter(private val viewModel: ContactsViewModel,
         val view = LayoutInflater.from(parent.context).inflate(layoutId, parent, false)
 
         if (viewType == TYPE_EDIT) {
-            view.findViewById<EditText>(R.id.contact_edit).addTextChangedListener(textWatcher)
+            view.findViewById<EditText>(R.id.contact_edit).addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence,
+                                               start: Int, count: Int, after: Int) {
+                }
+
+                override fun onTextChanged(s: CharSequence,
+                                           start: Int, before: Int, count: Int) {
+                    viewModel.filter(s.toString())
+                }
+
+                override fun afterTextChanged(s: Editable) {
+                }
+            })
         }
 
         return ViewHolder(view, viewType)
@@ -50,15 +62,19 @@ class ContactsInputAdapter(private val viewModel: ContactsViewModel,
         TYPE_CONTACT
     }
 
-    private class ViewHolder(itemView: View, type: Int) : RecyclerView.ViewHolder(itemView) {
-        var name: TextView? = null
+    private inner class ViewHolder(itemView: View, type: Int) : RecyclerView.ViewHolder(itemView) {
+        var name: Chip? = null
         var edit: EditText? = null
 
         init {
-            if (type == TYPE_CONTACT) {
-                name = itemView as TextView
-            } else {
-                edit = itemView.findViewById(R.id.contact_edit)
+            when (type) {
+                TYPE_CONTACT -> {
+                    name = itemView as Chip
+                    itemView.setOnCloseIconClickListener {
+                        viewModel.removeSelectedContact(adapterPosition)
+                    }
+                }
+                TYPE_EDIT -> edit = itemView.findViewById(R.id.contact_edit)
             }
         }
     }

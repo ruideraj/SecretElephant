@@ -45,7 +45,6 @@ class ContactListFragment : Fragment() {
         recycler.layoutManager = layoutManager
         adapter = ContactAdapter(viewModel) { clickedPosition ->
             viewModel.onContactClicked(type, clickedPosition)
-            adapter.notifyItemChanged(clickedPosition)
         }
         recycler.adapter = adapter
 
@@ -53,6 +52,12 @@ class ContactListFragment : Fragment() {
         liveData.observe(requireActivity(), { contactList ->
             if (contactList != null) {
                 adapter.setData(contactList)
+            }
+        })
+
+        viewModel.contactUpdate.observe(requireActivity(), { update ->
+            if (update.type == type) {
+                adapter.notifyItemChanged(update.listPosition)
             }
         })
 

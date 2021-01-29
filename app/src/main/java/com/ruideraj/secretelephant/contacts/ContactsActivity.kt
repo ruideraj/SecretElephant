@@ -1,10 +1,8 @@
-package com.ruideraj.secretelephant.contacts
+    package com.ruideraj.secretelephant.contacts
 
 import android.Manifest
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.LinearLayout
@@ -26,7 +24,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.ruideraj.secretelephant.*
 import com.ruideraj.secretelephant.match.MatchActivity
 
-class ContactsActivity : AppCompatActivity() {
+    class ContactsActivity : AppCompatActivity() {
 
     companion object {
         private const val REQUEST_CONTACTS = 100
@@ -68,61 +66,50 @@ class ContactsActivity : AppCompatActivity() {
         recycler.layoutManager = layoutManager
         recycler.addItemDecoration(decoration)
 
-        contactsInputAdapter = ContactsInputAdapter(viewModel, viewModel.selectedContacts,
-                object : TextWatcher {
-                    override fun beforeTextChanged(s: CharSequence,
-                                                   start: Int, count: Int, after: Int) {
-                    }
-
-                    override fun onTextChanged(s: CharSequence,
-                                               start: Int, before: Int, count: Int) {
-                        viewModel.filter(s.toString())
-                    }
-
-                    override fun afterTextChanged(s: Editable) {
-                    }
-                })
+        contactsInputAdapter = ContactsInputAdapter(viewModel, viewModel.selectedContacts)
         recycler.adapter = contactsInputAdapter
 
         progress = findViewById(R.id.contacts_progress_bar)
 
-        viewModel.showSelection.observe(this, { show ->
-            if (show != null) {
-                recycler.visibility = show
-                tabLayout.visibility = show
-                viewPager.visibility = show
-            }
-        })
+        viewModel.let {
+            it.showSelection.observe(this, { show ->
+                if (show != null) {
+                    recycler.visibility = show
+                    tabLayout.visibility = show
+                    viewPager.visibility = show
+                }
+            })
 
-        viewModel.showProgress.observe(this, { show ->
-            if (show != null) progress.visibility = show
-        })
+            it.showProgress.observe(this, { show ->
+                if (show != null) progress.visibility = show
+            })
 
-        viewModel.updatedContact.observe(this, { added ->
-            if (added == null) return@observe
+            it.contactUpdate.observe(this, { update ->
+                if (update.added) {
+                    // Update last two items, the newly added item and the EditText
+                    contactsInputAdapter.notifyItemInserted(update.selectedPosition)
+                    contactsInputAdapter.notifyItemChanged(contactsInputAdapter.itemCount - 1)
+                } else {
+                    // TODO Not using notifyItemRemoved() due to visual issues from the update animation
+                    contactsInputAdapter.notifyDataSetChanged()
+                }
+            })
 
-            if (added) {
-                // Update last two items, the newly added item and the EditText
-                contactsInputAdapter.notifyItemRangeChanged(contactsInputAdapter.itemCount - 2, 2)
-            } else {
-                contactsInputAdapter.notifyDataSetChanged()
-            }
-        })
+            it.requestPermission.observe(this, {
+                val permissions = arrayOf(Manifest.permission.READ_CONTACTS)
+                ActivityCompat.requestPermissions(this, permissions, REQUEST_CONTACTS)
+            })
 
-        viewModel.requestPermission.observe(this, {
-            val permissions = arrayOf(Manifest.permission.READ_CONTACTS)
-            ActivityCompat.requestPermissions(this, permissions, REQUEST_CONTACTS)
-        })
+            it.showContinue.observe(this, { invalidateOptionsMenu() })
 
-        viewModel.showContinue.observe(this, { invalidateOptionsMenu() })
+            it.selectAccount.observe(this, { requestEmailAccount() })
 
-        viewModel.selectAccount.observe(this, { requestEmailAccount() })
+            it.toast.observe(this, { stringId ->
+                if (stringId != null) Toast.makeText(this, stringId, Toast.LENGTH_SHORT).show()
+            })
 
-        viewModel.toast.observe(this, { stringId ->
-            if (stringId != null) Toast.makeText(this, stringId, Toast.LENGTH_SHORT).show()
-        })
-
-        viewModel.finish.observe(this, { finish() })
+            it.finish.observe(this, { finish() })
+        }
     }
 
     override fun onStart() {
