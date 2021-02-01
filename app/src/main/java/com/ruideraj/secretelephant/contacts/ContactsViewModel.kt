@@ -14,6 +14,7 @@ import com.ruideraj.secretelephant.R
 import com.ruideraj.secretelephant.SingleLiveEvent
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import javax.inject.Inject
 
 class ContactsViewModel @Inject constructor(private val contactsRepository: ContactsRepository,
@@ -58,7 +59,8 @@ class ContactsViewModel @Inject constructor(private val contactsRepository: Cont
     private val selectAccountData = SingleLiveEvent<Void>()
 
     private val contactUpdateFlow = MutableSharedFlow<ContactUpdate>()
-    val contactUpdate = contactUpdateFlow.asLiveData()
+    val contactUpdate: SharedFlow<ContactUpdate>
+        get() = contactUpdateFlow
 
     val toast: LiveData<Int>
         get() = toastData

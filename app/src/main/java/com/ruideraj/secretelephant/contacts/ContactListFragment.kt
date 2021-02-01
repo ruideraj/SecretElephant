@@ -6,10 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ruideraj.secretelephant.R
 import com.ruideraj.secretelephant.ViewModelFactory
+import kotlinx.coroutines.flow.collect
 
 class ContactListFragment : Fragment() {
 
@@ -48,31 +50,35 @@ class ContactListFragment : Fragment() {
         }
         recycler.adapter = adapter
 
-        val liveData = if (type == Contact.Type.PHONE) viewModel.phones else viewModel.emails
-        liveData.observe(requireActivity(), { contactList ->
-            if (contactList != null) {
-                adapter.setData(contactList)
-            }
-        })
-
-        viewModel.contactUpdate.observe(requireActivity(), { update ->
-            if (update.type == type) {
-                adapter.notifyItemChanged(update.listPosition)
-            }
-        })
-
-        if (type == Contact.Type.EMAIL) {
-            root.findViewById<View>(R.id.contacts_list_email_select).setOnClickListener {
-                viewModel.onSelectAccount()
-            }
-
-            if (viewModel.emailAccount.value.isNullOrEmpty()) {
-                root.findViewById<View>(R.id.contacts_list_email_overlay).visibility = View.VISIBLE
-            }
-
-            viewModel.emailAccount.observe(requireActivity(), { email ->
-                setOverlayVisible(email.isNullOrEmpty())
+        viewModel.let {
+            val liveData = if (type == Contact.Type.PHONE) it.phones else it.emails
+            liveData.observe(requireActivity(), { contactList ->
+                if (contactList != null) {
+                    adapter.setData(contactList)
+                }
             })
+
+            lifecycleScope.launchWhenStarted {
+                it.contactUpdate.collect { update ->
+                    if (update.type == type) {
+                        adapter.notifyItemChanged(update.listPosition)
+                    }
+                }
+            }
+
+            if (type == Contact.Type.EMAIL) {
+                root.findViewById<View>(R.id.contacts_list_email_select).setOnClickListener {
+                    viewModel.onSelectAccount()
+                }
+
+                if (it.emailAccount.value.isNullOrEmpty()) {
+                    root.findViewById<View>(R.id.contacts_list_email_overlay).visibility = View.VISIBLE
+                }
+
+                it.emailAccount.observe(requireActivity(), { email ->
+                    setOverlayVisible(email.isNullOrEmpty())
+                })
+            }
         }
 
         return root

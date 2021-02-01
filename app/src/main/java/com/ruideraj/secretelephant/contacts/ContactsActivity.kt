@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.flexbox.AlignItems
@@ -23,6 +24,7 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.ruideraj.secretelephant.*
 import com.ruideraj.secretelephant.match.MatchActivity
+import kotlinx.coroutines.flow.collect
 
     class ContactsActivity : AppCompatActivity() {
 
@@ -84,16 +86,18 @@ import com.ruideraj.secretelephant.match.MatchActivity
                 if (show != null) progress.visibility = show
             })
 
-            it.contactUpdate.observe(this, { update ->
-                if (update.added) {
-                    // Update last two items, the newly added item and the EditText
-                    contactsInputAdapter.notifyItemInserted(update.selectedPosition)
-                    contactsInputAdapter.notifyItemChanged(contactsInputAdapter.itemCount - 1)
-                } else {
-                    // TODO Not using notifyItemRemoved() due to visual issues from the update animation
-                    contactsInputAdapter.notifyDataSetChanged()
+            lifecycleScope.launchWhenStarted {
+                it.contactUpdate.collect { update ->
+                    if (update.added) {
+                        // Update last two items, the newly added item and the EditText
+                        contactsInputAdapter.notifyItemInserted(update.selectedPosition)
+                        contactsInputAdapter.notifyItemChanged(contactsInputAdapter.itemCount - 1)
+                    } else {
+                        // TODO Not using notifyItemRemoved() due to visual issues from the update animation
+                        contactsInputAdapter.notifyDataSetChanged()
+                    }
                 }
-            })
+            }
 
             it.requestPermission.observe(this, {
                 val permissions = arrayOf(Manifest.permission.READ_CONTACTS)
