@@ -1,7 +1,7 @@
 package com.ruideraj.secretelephant.contacts
 
+import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.view.View
 import androidx.lifecycle.*
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -10,6 +10,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.tasks.Task
 import com.ruideraj.secretelephant.AccountManager
+import com.ruideraj.secretelephant.PermissionManager
 import com.ruideraj.secretelephant.R
 import com.ruideraj.secretelephant.SingleLiveEvent
 import kotlinx.coroutines.*
@@ -18,7 +19,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import javax.inject.Inject
 
 class ContactsViewModel @Inject constructor(private val contactsRepository: ContactsRepository,
-                                            private val accountManager: AccountManager): ViewModel() {
+                                            private val accountManager: AccountManager,
+                                            private val permissionManager: PermissionManager): ViewModel() {
 
     val phones: LiveData<List<Contact>>
         get() = phonesData
@@ -34,9 +36,9 @@ class ContactsViewModel @Inject constructor(private val contactsRepository: Cont
 
     private val selectedData: MutableSet<String> = mutableSetOf()
 
-    val emailAccount: LiveData<String>
+    val emailAccount: LiveData<String?>
         get() = emailAccountData
-    private val emailAccountData = MutableLiveData<String>()
+    private val emailAccountData = MutableLiveData<String?>()
 
     val showSelection: LiveData<Int>
         get() = showSelectionData
@@ -50,9 +52,9 @@ class ContactsViewModel @Inject constructor(private val contactsRepository: Cont
         get() = showContinueData
     private val showContinueData = MutableLiveData(false)
 
-    private val requestPermissionData = SingleLiveEvent<Void>()
-    val requestPermission: LiveData<Void>
-        get() = requestPermissionData
+    val requestContactsPermission: SharedFlow<Unit>
+        get() = requestContactsPermissionFlow
+    private val requestContactsPermissionFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     val selectAccount: LiveData<Void>
         get() = selectAccountData
@@ -77,8 +79,6 @@ class ContactsViewModel @Inject constructor(private val contactsRepository: Cont
 
     private var filterParentJob: Job? = null
 
-    private var contactsPermission = PackageManager.PERMISSION_DENIED
-
     val signInIntent: Intent
         get() = accountManager.getSignInIntent()
 
@@ -90,16 +90,17 @@ class ContactsViewModel @Inject constructor(private val contactsRepository: Cont
         showSelectionData.value = View.GONE
     }
 
-    fun start(permission: Int) {
-        contactsPermission = permission
+    fun start() {
         setEmailAccount(accountManager.getAccount())
 
-        if (contactsPermission == PackageManager.PERMISSION_GRANTED) {
+        if (permissionManager.checkPermission(Manifest.permission.READ_CONTACTS)) {
             if (phones.value == null && emails.value == null) {
                 loadContacts()
             }
         } else {
-            requestPermissionData.call()
+            viewModelScope.launch {
+                requestContactsPermissionFlow.emit(Unit)
+            }
         }
     }
 
@@ -113,15 +114,8 @@ class ContactsViewModel @Inject constructor(private val contactsRepository: Cont
         }
     }
 
-    fun onRequestPermissionsResult(grantResults: IntArray) {
-        val result = if (grantResults.isEmpty()) {
-            PackageManager.PERMISSION_DENIED
-        } else {
-            grantResults[0]
-        }
-        contactsPermission = result
-
-        if (result == PackageManager.PERMISSION_GRANTED) {
+    fun onRequestContactsPermissionResult(isGranted: Boolean) {
+        if (isGranted) {
             loadContacts()
         } else {
             toastData.value = R.string.contact_permission_contacts_denied

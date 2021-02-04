@@ -30,10 +30,8 @@ interface SendRepository {
     data class Update(val position: Int, val status: Message.Status)
 }
 
-class SendRepositoryImpl @Inject constructor(private val context: Context,
-                                             @Named("SmsSender") private val smsSender: Sender,
-                                             private val emailSender: EmailSender,
-                                             private val propertiesReader: PropertiesReader) : SendRepository {
+class SendRepositoryImpl @Inject constructor(@Named("SmsSender") private val smsSender: Sender,
+                                             private val emailSender: EmailSender) : SendRepository {
 
     override val messages: LiveData<List<Message>>
         get() = messagesData

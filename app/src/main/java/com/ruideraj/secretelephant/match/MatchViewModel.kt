@@ -2,13 +2,14 @@ package com.ruideraj.secretelephant.match
 
 import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ruideraj.secretelephant.*
 import com.ruideraj.secretelephant.contacts.Contact
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -31,6 +32,10 @@ class MatchViewModel @Inject constructor(private val matchmaker: Matchmaker,
     val sendMessages: LiveData<MatchExchange>
         get() = sendMessagesData
     private val sendMessagesData = SingleLiveEvent<MatchExchange>()
+
+    val requestSmsPermission: SharedFlow<Unit>
+        get() = requestSmsPermissionFlow
+    private val requestSmsPermissionFlow = MutableSharedFlow<Unit>()
 
     val toast: LiveData<Int>
         get() = toastData
@@ -71,21 +76,20 @@ class MatchViewModel @Inject constructor(private val matchmaker: Matchmaker,
             val containsPhones = exchange.contacts.any { it.type == Contact.Type.PHONE }
             val needSmsPermission = !permissionManager.checkPermission(Manifest.permission.SEND_SMS)
             if (containsPhones && needSmsPermission) {
-                permissionManager.requestPermissions(arrayOf(Manifest.permission.SEND_SMS),
-                        REQUEST_SMS)
+                viewModelScope.launch {
+                    requestSmsPermissionFlow.emit(Unit)
+                }
             } else {
                 sendMessagesData.value = exchange
             }
         }
     }
 
-    fun onPermissionsResult(requestCode: Int, permissions: Array<String>, results: IntArray) {
-        if (requestCode == REQUEST_SMS) {
-            if (results.isEmpty() || results[0] != PackageManager.PERMISSION_GRANTED) {
-                toastData.value = R.string.match_permission_denied_sms
-            } else {
-                sendMessagesData.value = exchangeData.value
-            }
+    fun onSmsPermissionResult(isGranted: Boolean) {
+        if (isGranted) {
+            sendMessagesData.value = exchangeData.value
+        } else {
+            toastData.value = R.string.match_permission_denied_sms
         }
     }
 

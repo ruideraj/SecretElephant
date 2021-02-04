@@ -1,24 +1,26 @@
 package com.ruideraj.secretelephant.contacts
 
-import android.content.pm.PackageManager
 import android.util.Log
 import android.view.View
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.Observer
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.tasks.Task
 import com.ruideraj.secretelephant.AccountManager
+import com.ruideraj.secretelephant.PermissionManager
 import com.ruideraj.secretelephant.R
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.hamcrest.CoreMatchers.equalTo
 import org.junit.After
@@ -40,6 +42,9 @@ class ContactsViewModelTest {
     @RelaxedMockK
     private lateinit var accountManager: AccountManager
 
+    @RelaxedMockK
+    private lateinit var permissionManager: PermissionManager
+
     @MockK
     private lateinit var signInTask: Task<GoogleSignInAccount>
 
@@ -57,7 +62,7 @@ class ContactsViewModelTest {
         mockkStatic(Log::class)
         every { Log.d(any(), any()) } returns 0
 
-        viewModel = ContactsViewModel(contactsRepository, accountManager)
+        viewModel = ContactsViewModel(contactsRepository, accountManager, permissionManager)
     }
 
     @After
@@ -78,25 +83,30 @@ class ContactsViewModelTest {
         every { mockResult.phones } returns mockk()
         every { mockResult.emails } returns mockk()
         coEvery { contactsRepository.loadContacts() } returns mockResult
+        every { permissionManager.checkPermission(any()) } returns true
 
-        val permission = PackageManager.PERMISSION_GRANTED
-        viewModel.start(permission)
+        viewModel.start()
 
         coVerify { contactsRepository.loadContacts() }
     }
 
     @Test
-    fun contactsViewModel_start_permissionNotGranted_permissionRequested() {
-        val mockObserver: Observer<Void> = mockk(relaxed = true)
+    @ExperimentalCoroutinesApi
+    fun contactsViewModel_start_permissionNotGranted_permissionRequested() = runBlockingTest {
+        every { permissionManager.checkPermission(any()) } returns false
 
-        viewModel.requestPermission.observeForever(mockObserver)
+        var permissionsRequest = false
+        val collectJob = launch {
+            viewModel.requestContactsPermission.collect {
+                permissionsRequest = true
+            }
+        }
 
-        val permission = PackageManager.PERMISSION_DENIED
-        viewModel.start(permission)
+        viewModel.start()
 
-        verify { mockObserver.onChanged(any()) }
+        assertThat(permissionsRequest, equalTo(true))
 
-        viewModel.requestPermission.removeObserver(mockObserver)
+        collectJob.cancel()
     }
 
     @Test

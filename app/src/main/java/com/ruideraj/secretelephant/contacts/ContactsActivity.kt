@@ -1,4 +1,4 @@
-    package com.ruideraj.secretelephant.contacts
+package com.ruideraj.secretelephant.contacts
 
 import android.Manifest
 import android.content.Intent
@@ -7,10 +7,10 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
@@ -26,10 +26,9 @@ import com.ruideraj.secretelephant.*
 import com.ruideraj.secretelephant.match.MatchActivity
 import kotlinx.coroutines.flow.collect
 
-    class ContactsActivity : AppCompatActivity() {
+class ContactsActivity : AppCompatActivity() {
 
     companion object {
-        private const val REQUEST_CONTACTS = 100
         private const val REQUEST_SIGN_IN = 1000
     }
 
@@ -42,6 +41,8 @@ import kotlinx.coroutines.flow.collect
     private val viewModel by viewModels<ContactsViewModel> {
         ViewModelFactory(this)
     }
+
+    private lateinit var permissionLauncher: ActivityResultLauncher<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,10 +100,13 @@ import kotlinx.coroutines.flow.collect
                 }
             }
 
-            it.requestPermission.observe(this, {
-                val permissions = arrayOf(Manifest.permission.READ_CONTACTS)
-                ActivityCompat.requestPermissions(this, permissions, REQUEST_CONTACTS)
-            })
+            permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+                viewModel.onRequestContactsPermissionResult(isGranted)
+            }
+
+            lifecycleScope.launchWhenStarted {
+                it.requestContactsPermission.collect { permissionLauncher.launch(Manifest.permission.READ_CONTACTS) }
+            }
 
             it.showContinue.observe(this, { invalidateOptionsMenu() })
 
@@ -116,9 +120,9 @@ import kotlinx.coroutines.flow.collect
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        viewModel.start(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS))
+    override fun onResume() {
+        super.onResume()
+        viewModel.start()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -128,12 +132,6 @@ import kotlinx.coroutines.flow.collect
                 val task = GoogleSignIn.getSignedInAccountFromIntent(data)
                 viewModel.signInResult(task)
             }
-        }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        when (requestCode) {
-            REQUEST_CONTACTS -> viewModel.onRequestPermissionsResult(grantResults)
         }
     }
 

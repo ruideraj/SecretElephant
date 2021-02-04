@@ -4,7 +4,6 @@ import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.ruideraj.secretelephant.AccountManager
 import com.ruideraj.secretelephant.PermissionManager
-import com.ruideraj.secretelephant.Runner
 import com.ruideraj.secretelephant.contacts.Contact
 import io.mockk.MockKAnnotations
 import io.mockk.every

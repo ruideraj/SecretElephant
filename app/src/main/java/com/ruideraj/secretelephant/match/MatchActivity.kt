@@ -1,23 +1,30 @@
 package com.ruideraj.secretelephant.match
 
+import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ruideraj.secretelephant.KEY_EXCHANGE
 import com.ruideraj.secretelephant.R
 import com.ruideraj.secretelephant.ViewModelFactory
 import com.ruideraj.secretelephant.send.SendActivity
+import kotlinx.coroutines.flow.collect
 
 class MatchActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<MatchViewModel> { ViewModelFactory(this) }
+
+    private lateinit var permissionsLauncher: ActivityResultLauncher<String>
 
     private lateinit var adapter: MatchAdapter
 
@@ -57,9 +64,18 @@ class MatchActivity : AppCompatActivity() {
             startActivity(intent)
         })
 
+        permissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            viewModel.onSmsPermissionResult(isGranted)
+        }
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.requestSmsPermission.collect { permissionsLauncher.launch(Manifest.permission.SEND_SMS) }
+        }
+
         viewModel.toast.observe(this, { textId ->
             Toast.makeText(this, textId, Toast.LENGTH_SHORT).show()
         })
+
     }
 
     override fun onStart() {
@@ -88,10 +104,5 @@ class MatchActivity : AppCompatActivity() {
         }
 
         return super.onOptionsItemSelected(item)
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>, grantResults: IntArray) {
-        viewModel.onPermissionsResult(requestCode, permissions, grantResults)
     }
 }

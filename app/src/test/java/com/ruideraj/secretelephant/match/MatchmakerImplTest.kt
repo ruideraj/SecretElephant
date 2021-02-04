@@ -1,6 +1,5 @@
 package com.ruideraj.secretelephant.match
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.not

@@ -4,7 +4,6 @@ import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.ruideraj.secretelephant.contacts.ContactsViewModel
-import com.ruideraj.secretelephant.injection.ActivityModule
 import com.ruideraj.secretelephant.main.MainViewModel
 import com.ruideraj.secretelephant.match.MatchViewModel
 import com.ruideraj.secretelephant.send.SendViewModel
@@ -25,11 +24,11 @@ class ViewModelFactory constructor(private val activity: Activity): ViewModelPro
             }
             modelClass.isAssignableFrom(MatchViewModel::class.java) -> {
                 @Suppress("UNCHECKED_CAST")
-                return appComponent.matchComponent(ActivityModule(activity)).matchViewModel() as T
+                return appComponent.matchViewModel() as T
             }
             modelClass.isAssignableFrom(SendViewModel::class.java) -> {
                 @Suppress("UNCHECKED_CAST")
-                return appComponent.sendComponent(ActivityModule(activity)).sendViewModel() as T
+                return appComponent.sendViewModel() as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel Class: " + modelClass.name)
         }
