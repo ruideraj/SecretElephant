@@ -9,10 +9,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.tasks.Task
-import com.ruideraj.secretelephant.AccountManager
-import com.ruideraj.secretelephant.PermissionManager
-import com.ruideraj.secretelephant.R
-import com.ruideraj.secretelephant.SingleLiveEvent
+import com.ruideraj.secretelephant.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -20,7 +17,8 @@ import javax.inject.Inject
 
 class ContactsViewModel @Inject constructor(private val contactsRepository: ContactsRepository,
                                             private val accountManager: AccountManager,
-                                            private val permissionManager: PermissionManager): ViewModel() {
+                                            private val permissionManager: PermissionManager,
+                                            private val preferences: Preferences): ViewModel() {
 
     val phones: LiveData<List<Contact>>
         get() = phonesData
@@ -46,15 +44,23 @@ class ContactsViewModel @Inject constructor(private val contactsRepository: Cont
 
     val showProgress: LiveData<Int>
         get() = showProgressData
-    private val showProgressData = MutableLiveData(View.VISIBLE)
+    private val showProgressData = MutableLiveData(View.GONE)
+
+    val showSettings: LiveData<Int>
+        get() = showSettingsData
+    private val showSettingsData = MutableLiveData(View.GONE)
 
     val showContinue: LiveData<Boolean>
         get() = showContinueData
     private val showContinueData = MutableLiveData(false)
 
+    val showContactsPermissionRationale: SharedFlow<Unit>
+        get() = showContactsPermissionRationaleFlow
+    private val showContactsPermissionRationaleFlow = MutableSharedFlow<Unit>()
+
     val requestContactsPermission: SharedFlow<Unit>
         get() = requestContactsPermissionFlow
-    private val requestContactsPermissionFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    private val requestContactsPermissionFlow = MutableSharedFlow<Unit>()
 
     val selectAccount: LiveData<Void>
         get() = selectAccountData
@@ -98,8 +104,12 @@ class ContactsViewModel @Inject constructor(private val contactsRepository: Cont
                 loadContacts()
             }
         } else {
-            viewModelScope.launch {
-                requestContactsPermissionFlow.emit(Unit)
+            if (preferences.contactsShowPermissionDialog) {
+                viewModelScope.launch {
+                    showContactsPermissionRationaleFlow.emit(Unit)
+                }
+            } else {
+                showSettingsData.value = View.VISIBLE
             }
         }
     }
@@ -114,12 +124,21 @@ class ContactsViewModel @Inject constructor(private val contactsRepository: Cont
         }
     }
 
+    fun onPermissionRationaleResult(continued: Boolean) {
+        preferences.contactsShowPermissionDialog = false
+
+        if (continued) {
+            viewModelScope.launch { requestContactsPermissionFlow.emit(Unit) }
+        } else {
+            setListVisibility()
+        }
+    }
+
     fun onRequestContactsPermissionResult(isGranted: Boolean) {
         if (isGranted) {
             loadContacts()
         } else {
-            toastData.value = R.string.contact_permission_contacts_denied
-            finishData.call()
+            setListVisibility()
         }
     }
 
@@ -135,12 +154,18 @@ class ContactsViewModel @Inject constructor(private val contactsRepository: Cont
     }
 
     private fun setListVisibility() {
-        if (phones.value != null || emails.value != null) {
+        if (!permissionManager.checkPermission(Manifest.permission.READ_CONTACTS)) {
+            showSelectionData.value = View.GONE
+            showProgressData.value = View.GONE
+            showSettingsData.value = View.VISIBLE
+        } else if (phones.value != null || emails.value != null) {
             showSelectionData.value = View.VISIBLE
             showProgressData.value = View.GONE
+            showSettingsData.value = View.GONE
         } else {
             showSelectionData.value = View.GONE
             showProgressData.value = View.VISIBLE
+            showSettingsData.value = View.GONE
         }
     }
 

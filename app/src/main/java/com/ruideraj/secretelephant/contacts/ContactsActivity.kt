@@ -2,15 +2,20 @@ package com.ruideraj.secretelephant.contacts
 
 import android.Manifest
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
@@ -30,6 +35,8 @@ class ContactsActivity : AppCompatActivity() {
 
     companion object {
         private const val REQUEST_SIGN_IN = 1000
+
+        private const val PERMISSION_DIALOG_TAG = "contactPermissionRationale"
     }
 
     private lateinit var recycler: RecyclerView
@@ -37,6 +44,8 @@ class ContactsActivity : AppCompatActivity() {
     private lateinit var progress: LinearLayout
     private lateinit var tabLayout: TabLayout
     private lateinit var viewPager: ViewPager2
+    private lateinit var settingsText: TextView
+    private lateinit var settingsButton: Button
 
     private val viewModel by viewModels<ContactsViewModel> {
         ViewModelFactory(this)
@@ -74,6 +83,17 @@ class ContactsActivity : AppCompatActivity() {
 
         progress = findViewById(R.id.contacts_progress_bar)
 
+        settingsText = findViewById(R.id.contacts_settings_text)
+        settingsButton = findViewById<Button>(R.id.contacts_settings_button).apply {
+            setOnClickListener {
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.fromParts("package", packageName, null)).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(intent)
+            }
+        }
+
         viewModel.let {
             it.showSelection.observe(this, { show ->
                 if (show != null) {
@@ -87,6 +107,13 @@ class ContactsActivity : AppCompatActivity() {
                 if (show != null) progress.visibility = show
             })
 
+            it.showSettings.observe(this, { show ->
+                if (show != null) {
+                    settingsText.visibility = show
+                    settingsButton.visibility = show
+                }
+            })
+
             lifecycleScope.launchWhenStarted {
                 it.contactUpdate.collect { update ->
                     if (update.added) {
@@ -97,6 +124,15 @@ class ContactsActivity : AppCompatActivity() {
                         // TODO Not using notifyItemRemoved() due to visual issues from the update animation
                         contactsInputAdapter.notifyDataSetChanged()
                     }
+                }
+            }
+
+            lifecycleScope.launchWhenStarted {
+                it.showContactsPermissionRationale.collect {
+                    val should = ActivityCompat.shouldShowRequestPermissionRationale(
+                            this@ContactsActivity, Manifest.permission.READ_CONTACTS)
+                    AppLog.d("ContactsActivity", "should: $should")
+                    PermissionRationaleDialog().show(supportFragmentManager, PERMISSION_DIALOG_TAG)
                 }
             }
 

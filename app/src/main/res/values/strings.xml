@@ -12,8 +12,11 @@
     <string name="contact_list">Contact List</string>
     <string name="contact_enter">Enter a contact name</string>
     <string name="contact_get">Getting contacts&#8230;</string>
-    <string name="contact_permission_contacts_denied">Please allow permission to contacts to build your list of invites!</string>
+    <string name="contact_permission_dialog_title">Contacts Needed</string>
+    <string name="contact_permission_message">Please allow access to contacts to build your list of participants.</string>
     <string name="contact_permission_accounts_denied">Please allow permission to accounts to add emails to your invites!</string>
+    <string name="contact_settings_text">To select participants, go to app settings to enable the Contacts permission.</string>
+    <string name="contact_settings_button">Go to Settings</string>
     <string name="contact_email_select">SELECT ACCOUNT</string>
     <string name="contact_email_select_desc">To send email invitations, please select a Gmail account.</string>
     <string name="contact_googleplay_error">There was a problem accessing Google Play.  Please ensure that Google Play is enabled and updated.</string>
@@ -35,6 +38,7 @@
     <string name="action_continue">Continue</string>
     <string name="action_reorder">Reorder</string>
     <string name="action_send">Send</string>
+    <string name="action_cancel">Cancel</string>
 
     <string name="test_filename">test.properties</string>
     <string name="test_send_key_phone">phoneNumber</string>
