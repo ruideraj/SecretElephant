@@ -45,7 +45,7 @@ class ContactListFragment : Fragment() {
         recycler = root.findViewById(R.id.contacts_list_recycler)
         val layoutManager = LinearLayoutManager(requireContext())
         recycler.layoutManager = layoutManager
-        adapter = ContactAdapter(viewModel) { clickedPosition ->
+        adapter = ContactAdapter(this, viewModel) { clickedPosition ->
             viewModel.onContactClicked(type, clickedPosition)
         }
         recycler.adapter = adapter

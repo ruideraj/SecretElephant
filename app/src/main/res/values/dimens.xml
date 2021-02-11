@@ -14,4 +14,7 @@
          3 chips vertically: 92dp, 8dp of space between each row: 16dp, 112dp total-->
     <dimen name="contacts_input_recycler_max">112dp</dimen>
 
+    <dimen name="contacts_item_image_margin">16dp</dimen>
+    <dimen name="contacts_item_image_width">48dp</dimen>
+
 </resources>

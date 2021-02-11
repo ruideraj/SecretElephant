@@ -3,12 +3,16 @@ package com.ruideraj.secretelephant.contacts
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.ruideraj.secretelephant.R
 
-class ContactAdapter(private val viewModel: ContactsViewModel,
+class ContactAdapter(private val fragment: Fragment,
+                     private val viewModel: ContactsViewModel,
                      private val listener: ContactClickListener)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -27,6 +31,12 @@ class ContactAdapter(private val viewModel: ContactsViewModel,
         val vh = holder as ViewHolder
         vh.name.text = contact.name
         vh.data.text = contact.data
+
+        Glide.with(fragment)
+                .load(contact.avatarUri)
+                .placeholder(R.drawable.ic_contact_placeholder)
+                .circleCrop()
+                .into(vh.image)
 
         val colorId = if (viewModel.selectedContacts.contains(contact)) {
             R.color.bg_contact_selected
@@ -51,6 +61,7 @@ class ContactAdapter(private val viewModel: ContactsViewModel,
         private val clickListener = listener
         val name: TextView = itemView.findViewById(R.id.contactName)
         val data: TextView = itemView.findViewById(R.id.contactData)
+        val image: ImageView = itemView.findViewById(R.id.contactImage)
 
         init {
             itemView.setOnClickListener(this)
