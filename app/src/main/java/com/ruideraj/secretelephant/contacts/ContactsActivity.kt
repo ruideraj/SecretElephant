@@ -15,8 +15,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
@@ -129,9 +129,12 @@ class ContactsActivity : AppCompatActivity() {
 
             lifecycleScope.launchWhenStarted {
                 it.showContactsPermissionRationale.collect {
-                    val should = ActivityCompat.shouldShowRequestPermissionRationale(
-                            this@ContactsActivity, Manifest.permission.READ_CONTACTS)
-                    AppLog.d("ContactsActivity", "should: $should")
+                    val dialog = supportFragmentManager.findFragmentByTag(PERMISSION_DIALOG_TAG)
+                    if (dialog != null) {
+                        AppLog.d("ContactsActivity", "Dismissing existing dialog")
+                        (dialog as DialogFragment).dismiss()
+                    }
+
                     PermissionRationaleDialog().show(supportFragmentManager, PERMISSION_DIALOG_TAG)
                 }
             }
