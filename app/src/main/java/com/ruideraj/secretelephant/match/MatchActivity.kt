@@ -11,9 +11,11 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.ruideraj.secretelephant.AppLog
 import com.ruideraj.secretelephant.KEY_EXCHANGE
 import com.ruideraj.secretelephant.R
 import com.ruideraj.secretelephant.ViewModelFactory
@@ -21,6 +23,11 @@ import com.ruideraj.secretelephant.send.SendActivity
 import kotlinx.coroutines.flow.collect
 
 class MatchActivity : AppCompatActivity() {
+
+    companion object {
+        private const val PERMISSION_DIALOG_TAG = "matchPermissionRationale"
+        private const val SETTINGS_DIALOG_TAG = "matchSettingsDialog"
+    }
 
     private val viewModel by viewModels<MatchViewModel> { ViewModelFactory(this) }
 
@@ -38,44 +45,63 @@ class MatchActivity : AppCompatActivity() {
         recycler.layoutManager = layoutManager
         recycler.adapter = adapter
 
-        viewModel.exchange.observe(this, { exchange ->
-            if (exchange != null) {
-                if (adapter.itemCount == 0) {
-                    adapter.setData(exchange)
-                } else {
-                    adapter.setNewMatches(exchange)
+        viewModel.let {
+            it.exchange.observe(this, { exchange ->
+                if (exchange != null) {
+                    if (adapter.itemCount == 0) {
+                        adapter.setData(exchange)
+                    } else {
+                        adapter.setNewMatches(exchange)
+                    }
+                }
+            })
+
+            it.textId.observe(this, { id ->
+                if (id != null) { findViewById<TextView>(R.id.match_text).setText(id) }
+            })
+
+            it.noContacts.observe(this, {
+                Toast.makeText(this, R.string.match_contacts_missing, Toast.LENGTH_SHORT).show()
+                finish()
+            })
+
+            it.sendMessages.observe(this, { exchange ->
+                val intent = Intent(this, SendActivity::class.java).apply {
+                    putExtra(KEY_EXCHANGE, exchange)
+                }
+                startActivity(intent)
+            })
+
+            lifecycleScope.launchWhenStarted {
+                it.showSmsPermissionRationale.collect {
+                    val dialog = supportFragmentManager.findFragmentByTag(PERMISSION_DIALOG_TAG)
+                    if (dialog != null) (dialog as DialogFragment).dismiss()
+
+                    MatchPermissionRationaleDialog().show(supportFragmentManager, PERMISSION_DIALOG_TAG)
                 }
             }
-        })
 
-        viewModel.textId.observe(this, { id ->
-            if (id != null) { findViewById<TextView>(R.id.match_text).setText(id) }
-        })
-
-        viewModel.noContacts.observe(this, {
-            Toast.makeText(this, R.string.match_contacts_missing, Toast.LENGTH_SHORT).show()
-            finish()
-        })
-
-        viewModel.sendMessages.observe(this, { exchange ->
-            val intent = Intent(this, SendActivity::class.java).apply {
-                putExtra(KEY_EXCHANGE, exchange)
+            permissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+                it.onSmsPermissionResult(isGranted)
             }
-            startActivity(intent)
-        })
 
-        permissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            viewModel.onSmsPermissionResult(isGranted)
+            lifecycleScope.launchWhenStarted {
+                it.requestSmsPermission.collect { permissionsLauncher.launch(Manifest.permission.SEND_SMS) }
+            }
+
+            lifecycleScope.launchWhenStarted {
+                it.showAppSettingsDialog.collect {
+                    val dialog = supportFragmentManager.findFragmentByTag(SETTINGS_DIALOG_TAG)
+                    if (dialog != null) (dialog as DialogFragment).dismiss()
+
+                    MatchAppSettingsDialog().show(supportFragmentManager, SETTINGS_DIALOG_TAG)
+                }
+            }
+
+            it.toast.observe(this, { textId ->
+                Toast.makeText(this, textId, Toast.LENGTH_SHORT).show()
+            })
         }
-
-        lifecycleScope.launchWhenStarted {
-            viewModel.requestSmsPermission.collect { permissionsLauncher.launch(Manifest.permission.SEND_SMS) }
-        }
-
-        viewModel.toast.observe(this, { textId ->
-            Toast.makeText(this, textId, Toast.LENGTH_SHORT).show()
-        })
-
     }
 
     override fun onStart() {

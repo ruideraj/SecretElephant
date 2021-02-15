@@ -9,11 +9,9 @@ import androidx.fragment.app.activityViewModels
 import com.ruideraj.secretelephant.R
 import com.ruideraj.secretelephant.ViewModelFactory
 
-class PermissionRationaleDialog : DialogFragment() {
+class ContactsPermissionRationaleDialog : DialogFragment() {
 
-    private val viewModel by activityViewModels<ContactsViewModel> {
-        ViewModelFactory(requireActivity())
-    }
+    private val viewModel by activityViewModels<ContactsViewModel> { ViewModelFactory(requireActivity()) }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return requireActivity().let {

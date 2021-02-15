@@ -3,7 +3,6 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
-
     <dimen name="contacts_chip_height">32dp</dimen>
 
     <!-- Initial height for RecyclerView containing contact chips. Needs to be high enough to
@@ -16,5 +15,7 @@
 
     <dimen name="contacts_item_image_margin">16dp</dimen>
     <dimen name="contacts_item_image_width">48dp</dimen>
+
+    <dimen name="fab_margin">16dp</dimen>
 
 </resources>

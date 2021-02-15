@@ -14,7 +14,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class MatchViewModel @Inject constructor(private val matchmaker: Matchmaker,
-                                         private val permissionManager: PermissionManager)
+                                         private val permissionManager: PermissionManager,
+                                         private val preferences: Preferences)
     : ViewModel() {
 
     val textId: LiveData<Int>
@@ -33,9 +34,17 @@ class MatchViewModel @Inject constructor(private val matchmaker: Matchmaker,
         get() = sendMessagesData
     private val sendMessagesData = SingleLiveEvent<MatchExchange>()
 
+    val showSmsPermissionRationale: SharedFlow<Unit>
+        get() = showSmsPermissionRationaleFlow
+    private val showSmsPermissionRationaleFlow = MutableSharedFlow<Unit>()
+
     val requestSmsPermission: SharedFlow<Unit>
         get() = requestSmsPermissionFlow
     private val requestSmsPermissionFlow = MutableSharedFlow<Unit>()
+
+    val showAppSettingsDialog: SharedFlow<Unit>
+        get() = showAppSettingsDialogFlow
+    private val showAppSettingsDialogFlow = MutableSharedFlow<Unit>()
 
     val toast: LiveData<Int>
         get() = toastData
@@ -74,14 +83,27 @@ class MatchViewModel @Inject constructor(private val matchmaker: Matchmaker,
     fun send() {
         exchangeData.value?.let { exchange ->
             val containsPhones = exchange.contacts.any { it.type == Contact.Type.PHONE }
-            val needSmsPermission = !permissionManager.checkPermission(Manifest.permission.SEND_SMS)
-            if (containsPhones && needSmsPermission) {
-                viewModelScope.launch {
-                    requestSmsPermissionFlow.emit(Unit)
+            if (containsPhones) {
+                when {
+                    permissionManager.checkPermission(Manifest.permission.SEND_SMS) -> sendMessagesData.value = exchange
+                    preferences.matchShowPermissionDialog -> viewModelScope.launch {
+                        showSmsPermissionRationaleFlow.emit(Unit)
+                    }
+                    else -> viewModelScope.launch { showAppSettingsDialogFlow.emit(Unit) }
                 }
             } else {
                 sendMessagesData.value = exchange
             }
+        }
+    }
+
+    fun onPermissionRationaleResult(continued: Boolean) {
+        preferences.matchShowPermissionDialog = false
+
+        if (continued) {
+            viewModelScope.launch { requestSmsPermissionFlow.emit(Unit) }
+        } else {
+            toastData.value = R.string.match_permission_denied_sms
         }
     }
 

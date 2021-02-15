@@ -135,7 +135,7 @@ class ContactsActivity : AppCompatActivity() {
                         (dialog as DialogFragment).dismiss()
                     }
 
-                    PermissionRationaleDialog().show(supportFragmentManager, PERMISSION_DIALOG_TAG)
+                    ContactsPermissionRationaleDialog().show(supportFragmentManager, PERMISSION_DIALOG_TAG)
                 }
             }
 
