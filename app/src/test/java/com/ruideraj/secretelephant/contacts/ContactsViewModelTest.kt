@@ -10,6 +10,7 @@ import com.google.android.gms.common.api.Status
 import com.google.android.gms.tasks.Task
 import com.ruideraj.secretelephant.AccountManager
 import com.ruideraj.secretelephant.PermissionManager
+import com.ruideraj.secretelephant.Preferences
 import com.ruideraj.secretelephant.R
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
@@ -45,6 +46,9 @@ class ContactsViewModelTest {
     @RelaxedMockK
     private lateinit var permissionManager: PermissionManager
 
+    @RelaxedMockK
+    private lateinit var preferences: Preferences
+
     @MockK
     private lateinit var signInTask: Task<GoogleSignInAccount>
 
@@ -62,7 +66,7 @@ class ContactsViewModelTest {
         mockkStatic(Log::class)
         every { Log.d(any(), any()) } returns 0
 
-        viewModel = ContactsViewModel(contactsRepository, accountManager, permissionManager)
+        viewModel = ContactsViewModel(contactsRepository, accountManager, permissionManager, preferences)
     }
 
     @After

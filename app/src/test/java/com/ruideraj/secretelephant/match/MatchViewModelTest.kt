@@ -4,10 +4,12 @@ import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.ruideraj.secretelephant.AccountManager
 import com.ruideraj.secretelephant.PermissionManager
+import com.ruideraj.secretelephant.Preferences
 import com.ruideraj.secretelephant.contacts.Contact
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.RelaxedMockK
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -27,6 +29,9 @@ class MatchViewModelTest {
     private lateinit var permissionsManager: PermissionManager
 
     @MockK
+    private lateinit var preferences: Preferences
+
+    @MockK
     private lateinit var intent: Intent
 
     private var viewModel: MatchViewModel? = null
@@ -35,7 +40,7 @@ class MatchViewModelTest {
     fun setup() {
         MockKAnnotations.init(this)
 
-        viewModel = MatchViewModel(matchmaker, permissionsManager)
+        viewModel = MatchViewModel(matchmaker, permissionsManager, preferences)
     }
 
     @Test
